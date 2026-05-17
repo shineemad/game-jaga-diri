@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>RARA: Jaga Dirimu! — Game Edukasi Keselamatan Anak</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0d0505;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #game-container {
+        position: relative;
+      }
+      #game-container canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-container"></div>
+
+    <!-- Error catcher: tampilkan error JS di layar -->
+    <script>
+      function _showErr(msg, stack) {
+        var d = document.createElement("div");
+        d.style.cssText =
+          "color:#ff4444;background:#111;position:fixed;top:0;left:0;right:0;padding:10px 14px;z-index:9999;font-family:monospace;font-size:12px;white-space:pre-wrap;max-height:40vh;overflow-y:auto;border-bottom:2px solid #f00";
+        d.textContent = "JS ERROR: " + msg + (stack ? "\n" + stack : "");
+        document.body.prepend(d);
+      }
+      window.onerror = function (msg, src, line, col, err) {
+        _showErr(
+          msg + " [" + (src || "?") + ":" + line + ":" + col + "]",
+          err && err.stack ? err.stack : null,
+        );
+        return false;
+      };
+      window.addEventListener("unhandledrejection", function (e) {
+        _showErr(
+          "Unhandled Promise: " +
+            (e.reason && e.reason.message ? e.reason.message : e.reason),
+          e.reason && e.reason.stack ? e.reason.stack : null,
+        );
+      });
+    </script>
+
+    <!-- Phaser 3 Framework (lokal) -->
+    <script src="phaser.min.js"></script>
+    <script>
+      if (typeof Phaser === "undefined") {
+        document.body.innerHTML =
+          '<div style="color:#FFD700;background:#0d0505;position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-family:Arial;font-size:18px;text-align:center"><p>❌ Gagal memuat Phaser.<br>Pastikan file phaser.min.js ada di folder yang sama.</p></div>';
+      }
+    </script>
+
+    <!-- Core utilities -->
+    <script src="js/config.js?v=2"></script>
+    <script src="js/GameState.js?v=3"></script>
+    <script src="js/VoiceMeter.js?v=2"></script>
+    <script src="js/Draw.js?v=2"></script>
+    <script src="js/Audio.js?v=3"></script>
+    <script src="js/Dialog.js?v=4"></script>
+
+    <!-- Scenes -->
+    <script src="js/scenes/Boot.js?v=3"></script>
+    <script src="js/scenes/Splash.js?v=2"></script>
+    <script src="js/scenes/Menu.js?v=4"></script>
+    <script src="js/scenes/Credits.js?v=2"></script>
+    <script src="js/scenes/Prolog1.js?v=2"></script>
+    <script src="js/scenes/Day1.js?v=10"></script>
+    <script src="js/scenes/Result1.js?v=4"></script>
+    <script src="js/scenes/Prolog2.js?v=4"></script>
+    <script src="js/scenes/Day2.js?v=6"></script>
+    <script src="js/scenes/Result2.js?v=4"></script>
+    <script src="js/scenes/Prolog3.js?v=3"></script>
+    <script src="js/scenes/Day3.js?v=6"></script>
+    <script src="js/scenes/Result3.js?v=5"></script>
+    <script src="js/scenes/Ending.js?v=3"></script>
+    <script src="js/scenes/GameOver.js?v=4"></script>
+
+    <!-- Entry point -->
+    <script src="js/main.js?v=2"></script>
+  </body>
+</html>
