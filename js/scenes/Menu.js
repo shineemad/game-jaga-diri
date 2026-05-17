@@ -138,44 +138,116 @@ class Menu extends Phaser.Scene {
   _showSettings() {
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
+    const objs = [];
+
     const overlay = this.add.graphics().setDepth(50);
     overlay.fillStyle(0x000000, 0.7);
     overlay.fillRect(0, 0, W, H);
+    objs.push(overlay);
 
     const panel = this.add.graphics().setDepth(51);
     panel.fillStyle(CFG.C.PANEL, 0.95);
-    panel.fillRoundedRect(W / 2 - 180, H / 2 - 120, 360, 240, 14);
-    DrawUtils.sulselBorder(panel, W / 2 - 180, H / 2 - 120, 360, 240, 0.8);
+    panel.fillRoundedRect(W / 2 - 185, H / 2 - 150, 370, 300, 14);
+    DrawUtils.sulselBorder(panel, W / 2 - 185, H / 2 - 150, 370, 300, 0.8);
+    objs.push(panel);
 
     const title = this.add
-      .text(W / 2, H / 2 - 100, "⚙ Pengaturan", {
+      .text(W / 2, H / 2 - 132, "⚙  Pengaturan", {
         ...CFG.F.SUBTITLE,
         color: "#FFD700",
       })
       .setOrigin(0.5)
       .setDepth(52);
+    objs.push(title);
 
+    // ── Toggle BGM ─────────────────────────────────────────────────
+    const _makeToggle = (label, y, isOn, onToggle) => {
+      const lbl = this.add
+        .text(W / 2 - 90, y, label, {
+          fontFamily: "Arial",
+          fontSize: "15px",
+          color: "#CCCCCC",
+        })
+        .setDepth(52);
+      objs.push(lbl);
+
+      const btnG = this.add.graphics().setDepth(52);
+      const btnT = this.add
+        .text(W / 2 + 50, y + 1, "", {
+          fontFamily: "Arial",
+          fontSize: "14px",
+          fontStyle: "bold",
+        })
+        .setDepth(53)
+        .setInteractive({ useHandCursor: true });
+      objs.push(btnG);
+      objs.push(btnT);
+
+      const redraw = (on) => {
+        btnG.clear();
+        btnG.fillStyle(on ? 0x22aa55 : 0x882222, 0.9);
+        btnG.fillRoundedRect(W / 2 + 40, y - 3, 90, 26, 8);
+        btnT.setText(on ? "🔊  NYALA" : "🔇  MATI");
+        btnT.setColor(on ? "#44FF88" : "#FF8888");
+        btnT.setX(W / 2 + 85).setOrigin(0.5, 0);
+      };
+      redraw(isOn);
+
+      let state = isOn;
+      btnT.on("pointerdown", () => {
+        AudioManager.sfxClick();
+        state = onToggle();
+        redraw(state);
+      });
+      btnT.on("pointerover", () => btnG.setAlpha(0.6));
+      btnT.on("pointerout", () => btnG.setAlpha(1));
+    };
+
+    _makeToggle("🎵  Musik (BGM)", H / 2 - 90, AudioManager.isBGMOn(), () =>
+      AudioManager.toggleBGM(),
+    );
+    _makeToggle("🔔  Efek Suara", H / 2 - 45, AudioManager.isSFXOn(), () =>
+      AudioManager.toggleSFX(),
+    );
+
+    // ── Divider ────────────────────────────────────────────────────
+    const divG = this.add.graphics().setDepth(52);
+    divG.lineStyle(1, 0x555555, 0.7);
+    divG.lineBetween(W / 2 - 160, H / 2 + 5, W / 2 + 160, H / 2 + 5);
+    objs.push(divG);
+
+    // ── Info mikrofon ──────────────────────────────────────────────
     const info = this.add
       .text(
         W / 2,
-        H / 2 - 60,
-        'Izinkan mikrofon di browser Anda\nuntuk fitur TERIAK! yang lebih imersif.\n\nJika tidak tersedia, gunakan tombol\n"TERIAK!" yang muncul saat gameplay.',
-        { ...CFG.F.BODY, align: "center", wordWrap: { width: 320 } },
+        H / 2 + 40,
+        "🎤  Mikrofon\nIzinkan akses mikrofon di browser untuk\nfitur TERIAK! yang lebih imersif.\nJika tidak tersedia, tombol TERIAK!\nakan muncul otomatis saat gameplay.",
+        {
+          fontFamily: "Arial",
+          fontSize: "13px",
+          color: "#AAAAAA",
+          align: "center",
+          wordWrap: { width: 330 },
+          lineSpacing: 3,
+        },
       )
       .setOrigin(0.5)
       .setDepth(52);
+    objs.push(info);
 
+    // ── Tutup ──────────────────────────────────────────────────────
     const closeBtn = this.add
-      .text(W / 2, H / 2 + 80, "[ TUTUP ]", {
+      .text(W / 2, H / 2 + 128, "[ TUTUP ]", {
         ...CFG.F.BUTTON,
         color: "#FFD700",
       })
       .setOrigin(0.5)
       .setDepth(52)
       .setInteractive({ useHandCursor: true });
-
+    objs.push(closeBtn);
     closeBtn.on("pointerdown", () => {
-      [overlay, panel, title, info, closeBtn].forEach((o) => o.destroy());
+      AudioManager.sfxClick();
+      objs.forEach((o) => o.destroy());
     });
   }
 
@@ -187,12 +259,21 @@ class Menu extends Phaser.Scene {
     overlay.fillRect(0, 0, W, H);
 
     const txt = this.add
-      .text(W / 2, H / 2 - 20, "Yakin ingin keluar dari game?", CFG.F.SUBTITLE)
+      .text(
+        W / 2,
+        H / 2 - 20,
+        "Yakin ingin restart game?\n(Semua progres akan hilang)",
+        {
+          ...CFG.F.SUBTITLE,
+          align: "center",
+          wordWrap: { width: 340 },
+        },
+      )
       .setOrigin(0.5)
       .setDepth(51);
 
     const yes = this.add
-      .text(W / 2 - 70, H / 2 + 30, "[ YA ]", {
+      .text(W / 2 - 70, H / 2 + 40, "[ YA, RESTART ]", {
         ...CFG.F.BUTTON,
         color: "#FF4444",
       })
@@ -201,7 +282,7 @@ class Menu extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     const no = this.add
-      .text(W / 2 + 70, H / 2 + 30, "[ TIDAK ]", {
+      .text(W / 2 + 70, H / 2 + 40, "[ BATAL ]", {
         ...CFG.F.BUTTON,
         color: "#44FF88",
       })
@@ -209,7 +290,7 @@ class Menu extends Phaser.Scene {
       .setDepth(51)
       .setInteractive({ useHandCursor: true });
 
-    yes.on("pointerdown", () => window.close());
+    yes.on("pointerdown", () => window.location.reload());
     no.on("pointerdown", () => {
       [overlay, txt, yes, no].forEach((o) => o.destroy());
     });

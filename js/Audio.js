@@ -7,6 +7,8 @@ const AudioManager = (() => {
   let _sfxGain = null;
   let _enabled = true;
   let _bgmInterval = null;
+  let _bgmMuted = false; // status mute BGM
+  let _sfxMuted = false; // status mute SFX
 
   // Lazy init AudioContext (harus setelah interaksi user)
   function _init() {
@@ -14,10 +16,10 @@ const AudioManager = (() => {
     try {
       _ctx = new (window.AudioContext || window.webkitAudioContext)();
       _bgmGain = _ctx.createGain();
-      _bgmGain.gain.value = 0.18;
+      _bgmGain.gain.value = _bgmMuted ? 0 : 0.18; // hormati status mute
       _bgmGain.connect(_ctx.destination);
       _sfxGain = _ctx.createGain();
-      _sfxGain.gain.value = 0.45;
+      _sfxGain.gain.value = _sfxMuted ? 0 : 0.45; // hormati status mute
       _sfxGain.connect(_ctx.destination);
     } catch (e) {
       _enabled = false;
@@ -202,6 +204,25 @@ const AudioManager = (() => {
       _tone(280, 0.1, "sawtooth");
       _tone(200, 0.14, "sawtooth", null, 0.09);
       _tone(140, 0.22, "sawtooth", null, 0.2);
+    },
+
+    // ── Kontrol volume (dipanggil dari Settings) ──────────────────
+    toggleBGM() {
+      _bgmMuted = !_bgmMuted;
+      if (_bgmGain) _bgmGain.gain.value = _bgmMuted ? 0 : 0.18;
+      return !_bgmMuted; // true = ON
+    },
+    isBGMOn() {
+      return !_bgmMuted;
+    },
+
+    toggleSFX() {
+      _sfxMuted = !_sfxMuted;
+      if (_sfxGain) _sfxGain.gain.value = _sfxMuted ? 0 : 0.45;
+      return !_sfxMuted; // true = ON
+    },
+    isSFXOn() {
+      return !_sfxMuted;
     },
   };
 })();

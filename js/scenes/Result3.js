@@ -168,15 +168,22 @@ class Result3 extends Phaser.Scene {
       GameState.maxLives,
     );
 
-    // Tombol SERTIFIKAT
+    // Tombol SERTIFIKAT (kiri) + LANJUT CERITA (kanan)
+    this._makeBtn(W / 2 - 175, H - 95, 150, 34, "📋 SERTIFIKAT", 0x55448a, () =>
+      this._showCertificate(),
+    );
     this._makeBtn(
-      W / 2 - 80,
+      W / 2 + 25,
       H - 95,
-      160,
+      150,
       34,
-      "📋 LIHAT SERTIFIKAT",
-      0x55448a,
-      () => this._showCertificate(),
+      "▶ LANJUT CERITA",
+      0x1a6b3c,
+      () => {
+        AudioManager.sfxAchievement();
+        this.cameras.main.fadeOut(600);
+        this.time.delayedCall(600, () => this.scene.start("Ending"));
+      },
     );
 
     // Tombol bawah
