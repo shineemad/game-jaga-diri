@@ -1671,7 +1671,9 @@ class Day1 extends Phaser.Scene {
     const g = this.charGfx;
     const rx = this.raraBody.x,
       ry = this.raraBody.y - 32;
-    const raraState = this.raraBody.body.velocity.x !== 0 ? "walk" : "idle";
+    const vel = this.raraBody.body.velocity.x;
+    const raraState =
+      vel !== 0 ? (voiceMeter.isShout() ? "run" : "walk") : "idle";
     // Bobbing animasi saat idle
     const bobY = raraState === "idle" ? Math.sin(this.time.now / 500) * 2 : 0;
     DrawUtils.rara(g, rx, ry + bobY, raraState);

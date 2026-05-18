@@ -97,7 +97,7 @@ const CFG = {
   },
 
   // Skor
-  SCORE: { AMAN: 100, RAGU: 50, BAHAYA: 0 },
+  SCORE: { AMAN: 100, RAGU: 50, BAHAYA: 0, QUIZ: 200, LAPOR: 500 },
 
   // Voice meter
   VOICE: {

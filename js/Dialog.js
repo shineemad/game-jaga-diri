@@ -249,7 +249,9 @@ class DialogManager {
 
   _pickChoice(ch) {
     this._hideChoices();
-    GameState.addChoice(GameState.day, ch.label, ch.category);
+    const displayPts =
+      ch.points !== undefined ? ch.points : (CFG.SCORE[ch.category] ?? 0);
+    GameState.addChoice(GameState.day, ch.label, ch.category, ch.points);
     if (ch.onPick) ch.onPick(ch);
 
     // SFX berdasarkan kategori pilihan
@@ -259,8 +261,8 @@ class DialogManager {
 
     // Teks feedback informatif (2 baris)
     const msgs = {
-      AMAN: "✓ Pilihan AMAN! +100\nKeputusan yang tepat dan aman!",
-      RAGU: "⚠ Ragu-ragu... +50\nLebih tegas & percaya diri, ya!",
+      AMAN: `✓ Pilihan AMAN! +${displayPts}\nKeputusan yang tepat dan aman!`,
+      RAGU: `⚠ Ragu-ragu... +${displayPts}\nLebih tegas & percaya diri, ya!`,
       BAHAYA: "✗ Pilihan BERBAHAYA!\nHati-hati di kehidupan nyata!",
     };
     const cols = { AMAN: "#00FF88", RAGU: "#FFD700", BAHAYA: "#FF4444" };

@@ -12,7 +12,7 @@ class Prolog1 extends Phaser.Scene {
         bg: 0x87ceeb,
         img: "morning",
         title: "Hari 1: Jalan Kaki ke Sekolah",
-        text: 'Pagi hari di sebuah jalan menuju sekolah.\nRara, gadis 12 tahun berbaju ungu,\nbersiap berangkat ke SMP Harapan.\n"Hati-hati di jalan, Rara!" kata Ibu.',
+        text: 'Pagi hari di sebuah jalan menuju sekolah.\nRara, gadis 13 tahun berbaju ungu,\nbersiap berangkat ke SMP Harapan.\n"Hati-hati di jalan, Rara!" kata Ibu.',
       },
       {
         bg: 0x5ba0c8,

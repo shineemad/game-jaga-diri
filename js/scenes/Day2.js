@@ -9,6 +9,7 @@ class Day2 extends Phaser.Scene {
   // ══════════════════════════════════════════════════════════════════════
   create() {
     GameState.day = 2;
+    GameState.checkpoints.d2 = true; // bisa retry dari Day2 tanpa ulang prolog
     // Fix #6: BGM Hari 2 — melodi sedikit tegang
     AudioManager.startBGM(80, "day2");
     this.cameras.main.fadeIn(500);
@@ -350,13 +351,13 @@ class Day2 extends Phaser.Scene {
   // QUIZ BODY SAFETY
   _startQuiz() {
     this.phase = "quiz";
-    this.quizIdx = 0;
     this.quizScore = 0;
-    // Fix #8: Tutorial modal sekali-pakai sebelum kuis dimulai
+    this._quizFinished = false;
+    // Drag-drop body zone quiz
     this._showInlineTutorial(
       "\ud83d\udcf1 MISI KUIS!",
       "Jawab 4 pertanyaan tentang keselamatan diri.\nTidak ada batas waktu \u2014 pilih dengan bijak!\n\n\u2713 AMAN = poin penuh\n\u26a0 Salah = cukup baca penjelasannya, tidak ada hukuman nyawa",
-      () => this._showQuizQuestion(),
+      () => this._showBodyZoneQuiz(),
     );
   }
 
@@ -435,216 +436,389 @@ class Day2 extends Phaser.Scene {
     });
   }
 
-  get _quizQuestions() {
-    return [
-      {
-        q: 'Bagian mana saja dari tubuh yang disebut "Area Privat"?',
-        choices: [
-          { t: "Bagian yang ditutupi pakaian renang", correct: true },
-          { t: "Tangan dan kaki", correct: false },
-          { t: "Hanya bagian tertentu yang spesial", correct: false },
-          { t: "Semua bagian tubuh yang terasa geli", correct: false },
-        ],
-        edu: "Area privat adalah bagian tubuh yang tertutup pakaian renang.\nTidak ada orang yang boleh menyentuh kecuali dokter dengan izin orang tua!",
-      },
-      {
-        q: "Apa yang harus kamu lakukan jika ada orang dewasa yang menyentuh area privatmu?",
-        choices: [
-          { t: "KATAKAN TIDAK, PERGI, dan CERITAKAN", correct: true },
-          { t: "Diam saja agar tidak menimbulkan masalah", correct: false },
-          { t: "Marah-marah sendirian", correct: false },
-          { t: "Merahasiakannya karena malu", correct: false },
-        ],
-        edu: "3 langkah penting: KATAKAN TIDAK dengan keras,\nPERGI dari situasi itu, dan CERITAKAN pada orang dewasa terpercaya!",
-      },
-      {
-        q: 'Jika ada orang yang berkata "ini rahasia kita berdua saja" setelah menyentuhmu, artinya...',
-        choices: [
-          { t: "Ini adalah tanda bahaya — segera lapor!", correct: true },
-          { t: "Mereka hanya bercanda dan bermain", correct: false },
-          { t: "Tidak ada yang perlu dikhawatirkan", correct: false },
-          { t: "Kamu harus merahasiakannya", correct: false },
-        ],
-        edu: "RAHASIA BURUK adalah rahasia yang membuatmu takut atau tidak nyaman.\nKamu WAJIB menceritakannya kepada orang tua atau guru!",
-      },
-      {
-        q: "Ada orang yang terus-terusan mengirim pesan di HP memintamu kirim foto. Apa yang kamu lakukan?",
-        choices: [
-          { t: "Blokir nomor & lapor ke orang tua", correct: true },
-          { t: "Balas pesannya dan tanya mengapa", correct: false },
-          { t: "Kirim foto tapi yang biasa saja", correct: false },
-          { t: "Abaikan dan hapus pesannya saja", correct: false },
-        ],
-        edu: "Jangan pernah kirim foto kepada orang asing!\nBlokir → Screenshot bukti → Lapor ke orang tua / guru / Hotline 129!",
-      },
-    ];
-  }
-
-  _showQuizQuestion() {
+  _showBodyZoneQuiz() {
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
-    const q = this._quizQuestions[this.quizIdx];
+    const self = this;
+    const CHIP_W = 112,
+      CHIP_H = 36;
+    const ZONE_Y = 45,
+      ZONE_W = 195,
+      ZONE_H = H - 55;
+    const ZONE2_X = W - ZONE_W - 5;
+    const AMAN_CX = 5 + ZONE_W / 2;
+    const BAH_CX = ZONE2_X + ZONE_W / 2;
 
-    // Bersihkan tombol sebelumnya
-    this.children.list.filter((c) => c._isQuizObj).forEach((c) => c.destroy());
+    // AMAN zone (left)
+    const amanG = this.add.graphics().setScrollFactor(0).setDepth(40);
+    amanG._isQuizObj = true;
+    amanG.fillStyle(0x003300, 0.65);
+    amanG.fillRoundedRect(5, ZONE_Y, ZONE_W, ZONE_H, 10);
+    amanG.lineStyle(3, 0x44ff88, 0.8);
+    amanG.strokeRoundedRect(5, ZONE_Y, ZONE_W, ZONE_H, 10);
 
-    // Panel soal
-    const panel = this.add.graphics().setScrollFactor(0).setDepth(80);
-    panel._isQuizObj = true;
-    panel.fillStyle(CFG.C.PANEL, 0.96);
-    panel.fillRoundedRect(15, 30, W - 30, 90, 12);
-    DrawUtils.sulselBorder(panel, 15, 30, W - 30, 90, 0.8);
+    // BAHAYA zone (right)
+    const bahayaG = this.add.graphics().setScrollFactor(0).setDepth(40);
+    bahayaG._isQuizObj = true;
+    bahayaG.fillStyle(0x330000, 0.65);
+    bahayaG.fillRoundedRect(ZONE2_X, ZONE_Y, ZONE_W, ZONE_H, 10);
+    bahayaG.lineStyle(3, 0xff4444, 0.8);
+    bahayaG.strokeRoundedRect(ZONE2_X, ZONE_Y, ZONE_W, ZONE_H, 10);
 
-    const qnum = this.add
-      .text(
-        W / 2,
-        40,
-        `❓ Soal ${this.quizIdx + 1} / ${this._quizQuestions.length}`,
-        {
+    // Zone labels
+    const mkLbl = (cx, y, txt, col) => {
+      const t = this.add
+        .text(cx, y, txt, {
           fontFamily: "Arial",
-          fontSize: "13px",
-          color: "#FFD700",
+          fontSize: "11px",
+          color: col,
           fontStyle: "bold",
-        },
-      )
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(81);
-    qnum._isQuizObj = true;
-
-    const qtxt = this.add
-      .text(W / 2, 72, q.q, {
-        fontFamily: "Arial",
-        fontSize: "14px",
-        color: "#FFFFFF",
-        wordWrap: { width: W - 50 },
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(81);
-    qtxt._isQuizObj = true;
-
-    // Tombol jawaban (2 kolom) — dikocok agar jawaban benar tidak selalu di posisi sama
-    const _shuffled = q.choices.slice();
-    for (let _s = _shuffled.length - 1; _s > 0; _s--) {
-      const _j = Math.floor(Math.random() * (_s + 1));
-      [_shuffled[_s], _shuffled[_j]] = [_shuffled[_j], _shuffled[_s]];
-    }
-    _shuffled.forEach((c, i) => {
-      const col = i % 2,
-        row = Math.floor(i / 2);
-      const bx = 18 + col * (W / 2 - 10);
-      const by = 132 + row * 70;
-      const bw = W / 2 - 28;
-
-      const bg2 = this.add.graphics().setScrollFactor(0).setDepth(80);
-      bg2._isQuizObj = true;
-      bg2.fillStyle(0x333366, 0.85);
-      bg2.fillRoundedRect(bx, by, bw, 58, 10);
-      bg2.lineStyle(2, 0x6688cc, 0.7);
-      bg2.strokeRoundedRect(bx, by, bw, 58, 10);
-
-      const lbl = this.add
-        .text(bx + bw / 2, by + 29, c.t, {
-          fontFamily: "Arial",
-          fontSize: "13px",
-          color: "#FFFFFF",
-          wordWrap: { width: bw - 16 },
           align: "center",
         })
         .setOrigin(0.5)
         .setScrollFactor(0)
-        .setDepth(81)
-        .setInteractive({ useHandCursor: true });
-      lbl._isQuizObj = true;
+        .setDepth(41);
+      t._isQuizObj = true;
+    };
+    mkLbl(AMAN_CX, ZONE_Y + 22, "BOLEH\nDISENTUH", "#44FF88");
+    mkLbl(BAH_CX, ZONE_Y + 22, "AREA\nPRIVAT", "#FF6666");
 
-      lbl.on("pointerover", () => {
-        bg2.clear();
-        bg2.fillStyle(0x4455aa);
-        bg2.fillRoundedRect(bx, by, bw, 58, 10);
-        lbl.setColor("#FFD700");
-      });
-      lbl.on("pointerout", () => {
-        bg2.clear();
-        bg2.fillStyle(0x333366, 0.85);
-        bg2.fillRoundedRect(bx, by, bw, 58, 10);
-        bg2.lineStyle(2, 0x6688cc, 0.7);
-        bg2.strokeRoundedRect(bx, by, bw, 58, 10);
-        lbl.setColor("#FFFFFF");
-      });
-      lbl.on("pointerdown", () => this._onQuizAnswer(c, q.edu));
-    });
-
-    // Rara kecil di pojok
-    this.charGfx.clear();
-    DrawUtils.rara(this.charGfx, 55, H - 55, "idle");
-  }
-
-  _onQuizAnswer(choice, edu) {
-    this.children.list.filter((c) => c._isQuizObj).forEach((c) => c.destroy());
-    const W = CFG.WIDTH,
-      H = CFG.HEIGHT;
-
-    if (choice.correct) {
-      this.quizScore += CFG.SCORE.AMAN;
-      GameState.addChoice(2, choice.t, "AMAN");
-      AudioManager.sfxCorrect();
-    } else {
-      GameState.addChoice(2, choice.t, "BAHAYA");
-      AudioManager.sfxWrong();
-    }
-
-    // Feedback panel
-    const fbG = this.add.graphics().setScrollFactor(0).setDepth(90);
-    fbG.fillStyle(choice.correct ? 0x003300 : 0x330000, 0.94);
-    fbG.fillRoundedRect(15, H / 2 - 90, W - 30, 180, 12);
-    fbG.lineStyle(3, choice.correct ? CFG.C.AMAN : CFG.C.BAHAYA);
-    fbG.strokeRoundedRect(15, H / 2 - 90, W - 30, 180, 12);
-
-    const icon = this.add
-      .text(W / 2, H / 2 - 70, choice.correct ? "✓ BENAR!" : "✗ Kurang Tepat", {
+    // Instruction + timer (top center, between zones)
+    const instrTxt = this.add
+      .text(W / 2, 13, "Drag bagian tubuh ke zona yang tepat!", {
         fontFamily: "Arial",
-        fontSize: "22px",
-        color: choice.correct ? "#44FF88" : "#FF4444",
+        fontSize: "11px",
+        color: "#CCCCCC",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(55);
+    instrTxt._isQuizObj = true;
+
+    self._quizTimeLeft = 30;
+    const timerTxt = this.add
+      .text(W / 2, 31, "30", {
+        fontFamily: "Arial",
+        fontSize: "15px",
+        color: "#FFD700",
         fontStyle: "bold",
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
-      .setDepth(91);
+      .setDepth(55);
+    timerTxt._isQuizObj = true;
 
-    const eduTxt = this.add
-      .text(W / 2, H / 2 - 20, edu, {
-        fontFamily: "Arial",
-        fontSize: "13px",
-        color: "#FFFFCC",
-        wordWrap: { width: W - 60 },
-        align: "center",
-        lineSpacing: 4,
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(91);
+    // Items: 3 AMAN + 3 BAHAYA (shuffled)
+    const items = [
+      { label: "Tangan", correct: "AMAN" },
+      { label: "Pipi", correct: "AMAN" },
+      { label: "Bahu", correct: "AMAN" },
+      { label: "Perut", correct: "BAHAYA" },
+      { label: "Paha", correct: "BAHAYA" },
+      { label: "Privat", correct: "BAHAYA" },
+    ];
+    for (let _i = items.length - 1; _i > 0; _i--) {
+      const _j = Math.floor(Math.random() * (_i + 1));
+      [items[_i], items[_j]] = [items[_j], items[_i]];
+    }
 
-    const nextBtn = this.add
-      .text(W / 2, H / 2 + 65, "[ LANJUT ]", {
-        ...CFG.F.BUTTON,
-        color: "#FFD700",
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(91)
-      .setInteractive({ useHandCursor: true });
+    // Starting positions — 2 rows of 3 in center strip
+    const starts = [
+      { x: W / 2 - 130, y: 110 },
+      { x: W / 2, y: 110 },
+      { x: W / 2 + 130, y: 110 },
+      { x: W / 2 - 130, y: 170 },
+      { x: W / 2, y: 170 },
+      { x: W / 2 + 130, y: 170 },
+    ];
 
-    nextBtn.on("pointerdown", () => {
-      [fbG, icon, eduTxt, nextBtn].forEach((o) => o.destroy());
-      this.quizIdx++;
-      if (this.quizIdx < this._quizQuestions.length) {
-        this._showQuizQuestion();
-      } else {
-        this.phase = "chat_sim";
-        this._startChatSim();
+    // Create draggable chip containers
+    const chips = [];
+    items.forEach((item, idx) => {
+      const sp = starts[idx];
+      const chipBg = this.add.graphics();
+      chipBg.fillStyle(0x334477, 0.92);
+      chipBg.fillRoundedRect(-CHIP_W / 2, -CHIP_H / 2, CHIP_W, CHIP_H, 8);
+      chipBg.lineStyle(2, 0x8899cc, 0.8);
+      chipBg.strokeRoundedRect(-CHIP_W / 2, -CHIP_H / 2, CHIP_W, CHIP_H, 8);
+      const chipTxt = this.add
+        .text(0, 0, item.label, {
+          fontFamily: "Arial",
+          fontSize: "14px",
+          color: "#FFFFFF",
+          fontStyle: "bold",
+        })
+        .setOrigin(0.5);
+      const chip = this.add.container(sp.x, sp.y, [chipBg, chipTxt]);
+      chip.setSize(CHIP_W, CHIP_H);
+      chip.setInteractive({ draggable: true });
+      chip.setScrollFactor(0);
+      chip.setDepth(85);
+      chip._isQuizObj = true;
+      chip._correct = item.correct;
+      chip._placed = null;
+      chip._startX = sp.x;
+      chip._startY = sp.y;
+      chip._chipBg = chipBg;
+      chips.push(chip);
+    });
+
+    // Zone bounds for hit testing
+    const amanBounds = { x: 5, y: ZONE_Y, w: ZONE_W, h: ZONE_H };
+    const bahBounds = { x: ZONE2_X, y: ZONE_Y, w: ZONE_W, h: ZONE_H };
+    const inBounds = (cx, cy, b) =>
+      cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h;
+
+    const finishQuiz = () => {
+      if (self._quizFinished) return;
+      self._quizFinished = true;
+      if (self._quizTimer) {
+        self._quizTimer.remove();
+        self._quizTimer = null;
       }
+      self.input.off("drag");
+      self.input.off("dragend");
+
+      const correct = chips.filter((c) => c._placed === c._correct).length;
+      const pts =
+        correct === 6
+          ? CFG.SCORE.QUIZ
+          : correct >= 4
+            ? CFG.SCORE.AMAN
+            : CFG.SCORE.RAGU;
+      GameState.addScore(pts);
+      GameState.choices.push({
+        day: 2,
+        label: "Quiz Tubuh " + correct + "/6 benar",
+        category: correct === 6 ? "AMAN" : "RAGU",
+        pts,
+      });
+      if (correct === 6) GameState.earnAchievement("Penjaga Batas Tubuh");
+      correct === 6 ? AudioManager.sfxCorrect() : AudioManager.sfxNeutral();
+
+      chips.forEach((c) => {
+        if (c && c.active) c.destroy();
+      });
+      self.children.list
+        .filter((c) => c._isQuizObj && c.active)
+        .forEach((c) => c.destroy());
+
+      // Feedback panel
+      const fbG = self.add.graphics().setScrollFactor(0).setDepth(90);
+      fbG.fillStyle(correct === 6 ? 0x003300 : 0x332200, 0.94);
+      fbG.fillRoundedRect(15, H / 2 - 95, W - 30, 190, 12);
+      fbG.lineStyle(3, correct === 6 ? CFG.C.AMAN : CFG.C.RAGU);
+      fbG.strokeRoundedRect(15, H / 2 - 95, W - 30, 190, 12);
+
+      const scoreLabel =
+        correct === 6
+          ? "SEMPURNA! +" + CFG.SCORE.QUIZ
+          : correct + "/6 Benar! +" + pts;
+      const icon = self.add
+        .text(W / 2, H / 2 - 72, scoreLabel, {
+          fontFamily: "Arial",
+          fontSize: "22px",
+          color: correct === 6 ? "#44FF88" : "#FFD700",
+          fontStyle: "bold",
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(91);
+
+      const eduTxt = self.add
+        .text(
+          W / 2,
+          H / 2 - 10,
+          [
+            "Area Privat = bagian yang tertutup pakaian renang",
+            "BOLEH DISENTUH: Tangan, Pipi, Bahu",
+            "AREA PRIVAT: Perut, Paha, Privat",
+            "",
+            "Tidak ada yang boleh menyentuhnya tanpa izinmu!",
+          ].join("\n"),
+          {
+            fontFamily: "Arial",
+            fontSize: "13px",
+            color: "#FFFFCC",
+            wordWrap: { width: W - 60 },
+            align: "center",
+            lineSpacing: 4,
+          },
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(91);
+
+      const nextBtn = self.add
+        .text(W / 2, H / 2 + 72, "[ LANJUT ]", {
+          ...CFG.F.BUTTON,
+          color: "#FFD700",
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(91)
+        .setInteractive({ useHandCursor: true });
+      nextBtn.on("pointerdown", () => {
+        [fbG, icon, eduTxt, nextBtn].forEach((o) => o.destroy());
+        self.phase = "chat_sim";
+        self._startChatSim();
+      });
+    };
+
+    // Drag handlers
+    this.input.on("drag", (pointer, obj, dragX, dragY) => {
+      if (!obj._isQuizObj || obj._correct === undefined) return;
+      obj.x = dragX;
+      obj.y = dragY;
+      obj.setDepth(90);
+    });
+
+    this.input.on("dragend", (pointer, obj) => {
+      if (!obj._isQuizObj || obj._correct === undefined) return;
+      obj.setDepth(85);
+
+      if (inBounds(obj.x, obj.y, amanBounds)) {
+        // Alat Privat TIDAK boleh masuk zona BOLEH DISENTUH
+        if (obj._correct === "BAHAYA") {
+          obj._placed = null;
+          obj.x = obj._startX;
+          obj.y = obj._startY;
+          obj._chipBg.clear();
+          obj._chipBg.fillStyle(0x334477, 0.92);
+          obj._chipBg.fillRoundedRect(
+            -CHIP_W / 2,
+            -CHIP_H / 2,
+            CHIP_W,
+            CHIP_H,
+            8,
+          );
+          obj._chipBg.lineStyle(2, 0xff4444, 0.9);
+          obj._chipBg.strokeRoundedRect(
+            -CHIP_W / 2,
+            -CHIP_H / 2,
+            CHIP_W,
+            CHIP_H,
+            8,
+          );
+          // Feedback edukatif
+          const fbTxt = self.add
+            .text(
+              W / 2,
+              H * 0.46,
+              "⚠ Ini area privat!\nHanya boleh masuk ke zona AREA PRIVAT.",
+              {
+                fontFamily: "Arial",
+                fontSize: "13px",
+                color: "#FF8888",
+                fontStyle: "bold",
+                align: "center",
+                stroke: "#000",
+                strokeThickness: 2,
+              },
+            )
+            .setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(95);
+          fbTxt._isQuizObj = true;
+          self.time.delayedCall(1600, () => {
+            if (fbTxt.active) fbTxt.destroy();
+          });
+          return;
+        }
+        obj._placed = "AMAN";
+        const countBefore = chips.filter(
+          (c) => c._placed === "AMAN" && c !== obj,
+        ).length;
+        obj.x = AMAN_CX;
+        obj.y = ZONE_Y + 70 + countBefore * 60;
+        obj._chipBg.clear();
+        obj._chipBg.fillStyle(0x005522, 0.92);
+        obj._chipBg.fillRoundedRect(
+          -CHIP_W / 2,
+          -CHIP_H / 2,
+          CHIP_W,
+          CHIP_H,
+          8,
+        );
+        obj._chipBg.lineStyle(2, 0x44ff88);
+        obj._chipBg.strokeRoundedRect(
+          -CHIP_W / 2,
+          -CHIP_H / 2,
+          CHIP_W,
+          CHIP_H,
+          8,
+        );
+      } else if (inBounds(obj.x, obj.y, bahBounds)) {
+        obj._placed = "BAHAYA";
+        const countBefore = chips.filter(
+          (c) => c._placed === "BAHAYA" && c !== obj,
+        ).length;
+        obj.x = BAH_CX;
+        obj.y = ZONE_Y + 70 + countBefore * 60;
+        obj._chipBg.clear();
+        obj._chipBg.fillStyle(0x660000, 0.92);
+        obj._chipBg.fillRoundedRect(
+          -CHIP_W / 2,
+          -CHIP_H / 2,
+          CHIP_W,
+          CHIP_H,
+          8,
+        );
+        obj._chipBg.lineStyle(2, 0xff4444);
+        obj._chipBg.strokeRoundedRect(
+          -CHIP_W / 2,
+          -CHIP_H / 2,
+          CHIP_W,
+          CHIP_H,
+          8,
+        );
+      } else {
+        // Snap back to start
+        obj._placed = null;
+        obj.x = obj._startX;
+        obj.y = obj._startY;
+        obj._chipBg.clear();
+        obj._chipBg.fillStyle(0x334477, 0.92);
+        obj._chipBg.fillRoundedRect(
+          -CHIP_W / 2,
+          -CHIP_H / 2,
+          CHIP_W,
+          CHIP_H,
+          8,
+        );
+        obj._chipBg.lineStyle(2, 0x8899cc, 0.8);
+        obj._chipBg.strokeRoundedRect(
+          -CHIP_W / 2,
+          -CHIP_H / 2,
+          CHIP_W,
+          CHIP_H,
+          8,
+        );
+      }
+
+      if (chips.every((c) => c._placed !== null)) finishQuiz();
+    });
+
+    // 15-second countdown
+    self._quizTimer = this.time.addEvent({
+      delay: 1000,
+      repeat: -1,
+      callback: () => {
+        if (self._quizFinished) return;
+        self._quizTimeLeft--;
+        if (timerTxt && timerTxt.active) {
+          timerTxt.setText(String(self._quizTimeLeft));
+          if (self._quizTimeLeft <= 5) timerTxt.setColor("#FF4444");
+        }
+        if (self._quizTimeLeft <= 0) {
+          chips
+            .filter((c) => c._placed === null)
+            .forEach((c) => {
+              c._placed = "TIMEOUT";
+            });
+          finishQuiz();
+        }
+      },
     });
   }
 
@@ -652,53 +826,40 @@ class Day2 extends Phaser.Scene {
   // CHAT SIMULASI
   get _chatMessages() {
     return [
-      { from: "asing", text: "Hei dek, namaku Budi. Cantik sekali 😊" },
-      { from: "asing", text: "Ayo berteman sama saya. Pasti seru deh!" },
-      {
-        from: "choice",
-        text: "Rara mau membalas apa?",
-        choices: [
-          { label: "Tidak membalas (abaikan)", category: "AMAN" },
-          { label: '"Siapa ini? Saya tidak kenal."', category: "RAGU" },
-          {
-            label: '"Hei, ya ayo berteman!"',
-            category: "BAHAYA",
-            edu: "Jangan berteman dengan orang asing di media sosial!\nOrang yang tidak kita kenal bisa berbahaya meski terlihat baik.",
-          },
-        ],
-      },
+      { from: "asing", text: "Hai sayang, sekolahnya mana? Ikut om aja deh!" },
+      { from: "asing", text: "Foto dong seragamnya. Cantik sekali kayaknya." },
       {
         from: "asing",
-        text: "Eh dek, jangan cerita ke orang tua ya. Ini rahasia kita saja 🤫",
+        text: "Rahasia kita ya, jangan bilang mama! Ini hadiah buat kamu.",
       },
       {
         from: "choice",
-        text: "Sekarang Rara harus...",
+        text: "Rara harus memilih tindakan:",
         choices: [
-          { label: "📸 Screenshot + Lapor ke orang tua!", category: "AMAN" },
-          { label: "Diam saja, tidak usah dilaporkan.", category: "RAGU" },
           {
-            label: '"Oke, rahasia kita saja ya!"',
+            label: '"Iya om boleh!"',
             category: "BAHAYA",
-            edu: "RAHASIA yang membuatmu tidak nyaman BUKAN rahasia yang perlu dijaga!\nSelalu ceritakan pada orang tua atau guru yang kamu percaya.",
+            edu: "BAHAYA! Jangan pernah kirim foto ke orang asing!\nSegera blokir dan lapor ke orang tua atau guru!",
           },
-        ],
-      },
-      { from: "asing", text: "Kirim foto kamu dong dek. Saya mau lihat 📸" },
-      {
-        from: "choice",
-        text: "Tindakan Rara?",
-        choices: [
           {
-            label: "🚫 BLOKIR nomor ini!",
+            label: '"Maaf, salah kirim."',
+            category: "RAGU",
+            points: 50,
+          },
+          {
+            label: '"JANGAN GANGGU! Saya teriak ya!" + Voice keras',
             category: "AMAN",
-            onPick: () => GameState.earnAchievement("Pemblokir Handal"),
+            points: 150,
+            onPick: () => GameState.earnAchievement("Berani Bersuara"),
           },
-          { label: 'Balas "Maaf tidak bisa"', category: "RAGU" },
           {
-            label: "Kirim foto biasa dulu",
-            category: "BAHAYA",
-            edu: "JANGAN pernah kirim foto ke orang yang tidak dikenal!\nFoto bisa disalahgunakan. Blokir dan lapor ke orang tua!",
+            label: "📸 Screenshot + BLOKIR sekarang!",
+            category: "AMAN",
+            points: 100,
+            onPick: () => {
+              GameState.screenshotTaken = true;
+              GameState.earnAchievement("Pemblokir Handal");
+            },
           },
         ],
       },
@@ -742,8 +903,9 @@ class Day2 extends Phaser.Scene {
     bg.fillStyle(0x1e1e2e, 0.95);
     bg.fillRoundedRect(bx, H * 0.2, bw, 60, 10);
 
+    // Auto-type effect (WA style)
     const txt = this.add
-      .text(bx + 12, H * 0.21, msg.text, {
+      .text(bx + 12, H * 0.21, "", {
         fontFamily: "Arial",
         fontSize: "14px",
         color: "#EEEEEE",
@@ -752,8 +914,18 @@ class Day2 extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(81);
     txt._isChatObj = true;
+    const fullText = msg.text;
+    let charIdx = 0;
+    const typeTimer = this.time.addEvent({
+      delay: 30,
+      repeat: fullText.length - 1,
+      callback: () => {
+        txt.setText(fullText.slice(0, ++charIdx));
+      },
+    });
+    txt._typeTimer = typeTimer;
 
-    // Tombol lanjut
+    // Tombol lanjut (juga skip typewriter jika masih berjalan)
     const next = this.add
       .text(W - 20, H - 30, "▶ TAP", CFG.F.SMALL)
       .setOrigin(1, 1)
@@ -769,6 +941,12 @@ class Day2 extends Phaser.Scene {
       repeat: -1,
     });
     next.on("pointerdown", () => {
+      if (typeTimer && typeTimer.getProgress() < 1) {
+        // Skip animasi — tampilkan langsung
+        typeTimer.remove();
+        txt.setText(fullText);
+        return;
+      }
       this.chatIdx++;
       this._showNextChatMsg();
     });
@@ -782,6 +960,61 @@ class Day2 extends Phaser.Scene {
     panG.fillStyle(CFG.C.PANEL, 0.96);
     panG.fillRoundedRect(15, H * 0.38, W - 30, 195, 12);
     DrawUtils.sulselBorder(panG, 15, H * 0.38, W - 30, 195, 0.7);
+
+    // Countdown 8 detik — sesuai spec "Chat Simulasi V1 menggunakan timer"
+    let _chatCountLeft = 8;
+    const chatCountTxt = this.add
+      .text(W - 28, H * 0.4, "8", {
+        fontFamily: "Arial",
+        fontSize: "20px",
+        color: "#FFD700",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(82);
+    chatCountTxt._isChatObj = true;
+
+    const chatCountTimer = this.time.addEvent({
+      delay: 1000,
+      repeat: -1,
+      callback: () => {
+        _chatCountLeft--;
+        if (chatCountTxt && chatCountTxt.active) {
+          chatCountTxt.setText(String(_chatCountLeft));
+          if (_chatCountLeft <= 3) chatCountTxt.setColor("#FF4444");
+        }
+        if (_chatCountLeft <= 0) {
+          chatCountTimer.remove();
+          // Timeout → otomatis RAGU (diam = ragu-ragu)
+          this.children.list
+            .filter((c) => c._isChatObj)
+            .forEach((c) => c.destroy());
+          // Visual feedback: Rara terlihat takut
+          this.charGfx.clear();
+          DrawUtils.rara(this.charGfx, W * 0.15, H * 0.55, "scared");
+          const fb = this.add
+            .text(W / 2, H / 2, "⏰ Waktu habis! Rara diam kebingungan...", {
+              fontFamily: "Arial",
+              fontSize: "14px",
+              color: "#FFAAAA",
+              fontStyle: "bold",
+              align: "center",
+              stroke: "#000",
+              strokeThickness: 2,
+            })
+            .setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(200);
+          GameState.addChoice(2, "(Diam — tidak merespons)", "RAGU", 0);
+          this.time.delayedCall(1500, () => {
+            if (fb.active) fb.destroy();
+            this.chatIdx++;
+            this._showNextChatMsg();
+          });
+        }
+      },
+    });
 
     const qTxt = this.add
       .text(W / 2, H * 0.4, msg.text, {
@@ -823,12 +1056,23 @@ class Day2 extends Phaser.Scene {
       lbl._isChatObj = true;
 
       lbl.on("pointerdown", () => {
+        chatCountTimer.remove();
         GameState.addChoice(2, c.label, c.category);
         if (c.onPick) c.onPick();
         // Fix #1: BAHAYA di chat sim TIDAK mengurangi nyawa — hanya feedback edukatif
         this.children.list
           .filter((cc) => cc._isChatObj)
           .forEach((cc) => cc.destroy());
+
+        // Visual feedback: Rara terlihat takut jika pilih BAHAYA/RAGU
+        if (c.category === "BAHAYA" || c.category === "RAGU") {
+          this.charGfx.clear();
+          DrawUtils.rara(this.charGfx, W * 0.15, H * 0.55, "scared");
+          this.time.delayedCall(1800, () => {
+            this.charGfx.clear();
+            DrawUtils.rara(this.charGfx, W * 0.15, H * 0.55, "idle");
+          });
+        }
 
         if (c.category === "BAHAYA" && c.edu) {
           // Tampilkan panel edukatif sebelum lanjut
@@ -967,6 +1211,7 @@ class Day2 extends Phaser.Scene {
             {
               label: "📢 Teriak LAPOR! + bergerak ke depan",
               category: "AMAN",
+              points: CFG.SCORE.LAPOR,
               onPick: () => {
                 GameState.earnAchievement("Berani Lapor");
               },

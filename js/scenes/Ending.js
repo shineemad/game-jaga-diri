@@ -141,14 +141,12 @@ class Ending extends Phaser.Scene {
       story.push("Berkat keberanian Rara, pelaku dilaporkan ke polisi.");
     }
     // Penutup berdasarkan nilai
-    if (grade.label === "Pahlawan Sejati") {
+    if (grade.label.includes("PAHLAWAN")) {
       story.push(
-        '\ud83e\udd86 "Pilihan terbaik Rara menginspirasi teman-temannya untuk berani bersuara!"',
+        '🦦 "Pilihan terbaik Rara menginspirasi teman-temannya untuk berani bersuara!"',
       );
-    } else if (grade.label === "Jagoan Pemberani") {
-      story.push(
-        '"Berani bersuara adalah tanda kekuatan!" \u2014 Rara \ud83e\udd86',
-      );
+    } else if (grade.label === "Sang Jagoan") {
+      story.push('"Berani bersuara adalah tanda kekuatan!" — Rara 🦦');
     } else {
       story.push(
         '"Setiap hari adalah kesempatan untuk belajar menjadi lebih aman." \u2014 Rara',

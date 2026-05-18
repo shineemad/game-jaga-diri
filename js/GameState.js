@@ -34,10 +34,15 @@ const GameState = {
     this.checkpoints = { d1: false, d2: false, d3: false };
   },
 
-  addChoice(day, label, category) {
-    const pts = CFG.SCORE[category] ?? 0;
+  addChoice(day, label, category, overridePts) {
+    const pts =
+      overridePts !== undefined ? overridePts : (CFG.SCORE[category] ?? 0);
     this.score += pts;
     this.choices.push({ day, label, category, pts });
+  },
+
+  addScore(pts) {
+    this.score += pts;
   },
 
   loseLife() {

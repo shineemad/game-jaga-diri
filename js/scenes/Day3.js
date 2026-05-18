@@ -8,6 +8,7 @@ class Day3 extends Phaser.Scene {
   // ══════════════════════════════════════════════════════════════════════
   create() {
     GameState.day = 3;
+    GameState.checkpoints.d3 = true; // bisa retry dari Day3 tanpa ulang prolog
     // Fix #6: BGM Hari 3 — melodi gelap/misterius
     AudioManager.startBGM(75, "day3");
     this.cameras.main.fadeIn(600);
@@ -23,6 +24,7 @@ class Day3 extends Phaser.Scene {
     this.voiceAccum = 0; // ms voice held
     this.voiceTarget = 5000; // 5 detik teriak non-stop
     this.panicUsed = false;
+    this._screenshotBtnShown = false;
     this._rainTimer = 0;
     this._paused = false;
 
@@ -309,25 +311,41 @@ class Day3 extends Phaser.Scene {
   // CHAT V2 — Pesan Agresif
   get _chatV2Msgs() {
     return [
-      { from: "boss", text: "Hei sayang. Sudah lama tidak dengar kabarmu 😈" },
-      {
-        from: "boss",
-        text: "Kirim foto selfie sekarang ya. Untuk koleksi pribadinya~",
-      },
+      { from: "boss", text: "Hai cantik! Hujan deras ya 😢" },
+      { from: "boss", text: "Mau jemput? Gratis kok, kasihan basah!" },
+      { from: "boss", text: "Cepat balas dong sayang 🥺 Mana foto kamu?" },
       {
         from: "choice",
         choices: [
           {
-            label: "📸 Screenshot + Lapor segera!",
-            category: "AMAN",
+            label: "Balas dengan foto",
+            category: "BAHAYA",
+            edu: "BAHAYA! Jangan kirim foto ke orang yang tidak dikenal!\nFoto bisa disalahgunakan untuk tujuan jahat!",
+          },
+          {
+            label: '"Iya om, jemput sini!"',
+            category: "BAHAYA",
+            edu: "BAHAYA BESAR! Jangan ikut kendaraan orang asing!\nSelalu minta dijemput orang tua atau yang terpercaya!",
             onPick: () => {
-              GameState.screenshotTaken = true;
-              GameState.earnAchievement("Screenshot Evidence");
+              GameState.lives = 0;
             },
           },
-          { label: '"Tidak mau, pergi!"', category: "AMAN" },
-          { label: "Abaikan tanpa lapor", category: "RAGU" },
-          { label: "Membalas pesannya", category: "BAHAYA" },
+          {
+            label: "Blokir nomor ini & Lapor ke orang tua!",
+            category: "AMAN",
+            points: 200,
+            onPick: () => {
+              GameState.earnAchievement("Blokir Cepat");
+            },
+          },
+          {
+            label: "📸 Screenshot dulu, lalu blokir!",
+            category: "AMAN",
+            points: 100,
+            onPick: () => {
+              GameState.screenshotTaken = true;
+            },
+          },
         ],
       },
       {
@@ -384,7 +402,7 @@ class Day3 extends Phaser.Scene {
     bubble.strokeRoundedRect(18, H * 0.2, W * 0.7, 65, 10);
 
     const txt = this.add
-      .text(30, H * 0.21, msg.text, {
+      .text(30, H * 0.21, "", {
         fontFamily: "Arial",
         fontSize: "14px",
         color: "#FFAAAA",
@@ -393,6 +411,15 @@ class Day3 extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(81);
     txt._isChatV2 = true;
+    const fullText = msg.text;
+    let charIdx = 0;
+    const typeTimer = this.time.addEvent({
+      delay: 28,
+      repeat: fullText.length - 1,
+      callback: () => {
+        txt.setText(fullText.slice(0, ++charIdx));
+      },
+    });
 
     const next = this.add
       .text(W - 20, H - 28, "▶ TAP", CFG.F.SMALL)
@@ -409,6 +436,11 @@ class Day3 extends Phaser.Scene {
       repeat: -1,
     });
     next.on("pointerdown", () => {
+      if (typeTimer && typeTimer.getProgress() < 1) {
+        typeTimer.remove();
+        txt.setText(fullText);
+        return;
+      }
       this.chatV2Idx++;
       this._showChatV2Msg();
     });
@@ -433,6 +465,60 @@ class Day3 extends Phaser.Scene {
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(81)._isChatV2 = true;
+
+    // Countdown timer — 6 detik untuk memilih
+    let _countLeft = 6;
+    const timerTxt = this.add
+      .text(W - 28, H * 0.3, "6", {
+        fontFamily: "Arial",
+        fontSize: "20px",
+        color: "#FFD700",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(82);
+    timerTxt._isChatV2 = true;
+
+    const doPick = (c) => {
+      if (this._chatV2CountTimer) {
+        this._chatV2CountTimer.remove();
+        this._chatV2CountTimer = null;
+      }
+      GameState.addChoice(3, c.label, c.category, c.points);
+      if (c.onPick) c.onPick();
+      if (c.category === "BAHAYA") GameState.loseLife();
+      if (!GameState.isAlive()) {
+        this._goGameOver();
+        return;
+      }
+      this.children.list
+        .filter((cc) => cc._isChatV2)
+        .forEach((cc) => cc.destroy());
+      this.chatV2Idx++;
+      this._showChatV2Msg();
+    };
+
+    this._chatV2CountTimer = this.time.addEvent({
+      delay: 1000,
+      repeat: -1,
+      callback: () => {
+        _countLeft--;
+        if (timerTxt && timerTxt.active) {
+          timerTxt.setText(String(_countLeft));
+          if (_countLeft <= 3) timerTxt.setColor("#FF4444");
+        }
+        if (_countLeft <= 0) {
+          this._chatV2CountTimer.remove();
+          this._chatV2CountTimer = null;
+          // Auto-pick RAGU (ragu-ragu / tidak bereaksi)
+          const fallback =
+            choices.find((c) => c.category === "RAGU") ||
+            choices[choices.length - 1];
+          doPick(fallback);
+        }
+      },
+    });
 
     choices.forEach((c, i) => {
       const by = H * 0.34 + i * 46;
@@ -462,20 +548,7 @@ class Day3 extends Phaser.Scene {
         .setInteractive({ useHandCursor: true });
       lbl._isChatV2 = true;
 
-      lbl.on("pointerdown", () => {
-        GameState.addChoice(3, c.label, c.category);
-        if (c.onPick) c.onPick();
-        if (c.category === "BAHAYA") GameState.loseLife();
-        if (!GameState.isAlive()) {
-          this._goGameOver();
-          return;
-        }
-        this.children.list
-          .filter((cc) => cc._isChatV2)
-          .forEach((cc) => cc.destroy());
-        this.chatV2Idx++;
-        this._showChatV2Msg();
-      });
+      lbl.on("pointerdown", () => doPick(c));
     });
   }
 
@@ -497,11 +570,87 @@ class Day3 extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(80);
     lbl._isChatV2 = true;
+
+    // Tombol Screenshot Evidence (spec: "fitur Screenshot untuk bonus poin + Achievement")
+    if (!this._screenshotBtnShown) {
+      this._screenshotBtnShown = true;
+      const snapBg = this.add.graphics().setScrollFactor(0).setDepth(82);
+      snapBg._isChatV2 = true;
+      snapBg.fillStyle(0x222244, 0.9);
+      snapBg.fillRoundedRect(W - 98, 43, 88, 38, 8);
+      snapBg.lineStyle(2, 0x4477ff, 0.8);
+      snapBg.strokeRoundedRect(W - 98, 43, 88, 38, 8);
+
+      const snapBtn = this.add
+        .text(W - 54, 62, "📸 SIMPAN", {
+          fontFamily: "Arial",
+          fontSize: "11px",
+          color: "#88CCFF",
+          fontStyle: "bold",
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(83)
+        .setInteractive({ useHandCursor: true });
+      snapBtn._isChatV2 = true;
+
+      snapBtn.on("pointerover", () => snapBtn.setColor("#FFFFFF"));
+      snapBtn.on("pointerout", () => snapBtn.setColor("#88CCFF"));
+      snapBtn.once("pointerdown", () => {
+        if (GameState.screenshotTaken) return;
+        GameState.screenshotTaken = true;
+        GameState.earnAchievement("Screenshot Evidence");
+        GameState.addScore(50);
+        AudioManager.sfxCorrect();
+        // Flash putih seperti foto diambil
+        const flash = this.add.graphics().setScrollFactor(0).setDepth(300);
+        flash.fillStyle(0xffffff, 0.85);
+        flash.fillRect(0, 0, W, H);
+        this.tweens.add({
+          targets: flash,
+          alpha: 0,
+          duration: 350,
+          onComplete: () => flash.destroy(),
+        });
+        // Badge konfirmasi
+        const badge = this.add
+          .text(
+            W / 2,
+            H * 0.44,
+            "📸 Screenshot tersimpan! +50\n🏆 Achievement: Screenshot Evidence",
+            {
+              fontFamily: "Arial",
+              fontSize: "13px",
+              color: "#88CCFF",
+              fontStyle: "bold",
+              align: "center",
+              stroke: "#000",
+              strokeThickness: 2,
+            },
+          )
+          .setOrigin(0.5)
+          .setScrollFactor(0)
+          .setDepth(301);
+        this.tweens.add({
+          targets: badge,
+          y: badge.y - 30,
+          alpha: 0,
+          duration: 2000,
+          onComplete: () => badge.destroy(),
+        });
+        snapBg.setAlpha(0.3);
+        snapBtn.setText("✓ TERSIMPAN").setColor("#44FF88").disableInteractive();
+      });
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════════
   // CEK PLAT OJOL
   _startPlatCheck() {
+    if (this._chatV2CountTimer) {
+      this._chatV2CountTimer.remove();
+      this._chatV2CountTimer = null;
+    }
     this.children.list.filter((c) => c._isChatV2).forEach((c) => c.destroy());
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
@@ -785,63 +934,98 @@ class Day3 extends Phaser.Scene {
   get _bossRounds() {
     return [
       {
-        bossText:
-          '"Jangan teriak-teriak, nanti kamu dimarahi orang. Diam saja!"',
+        // Fase A
+        bossText: '"Hujan nih, mau dianter? Kasihan basah! Naik sini aja~"',
         choices: [
           {
-            label: "📢 TERIAK KERAS + Minta bantuan!",
+            label: "Tidak mau! Saya tunggu jemputan sendiri!",
             category: "AMAN",
-            dmg: 0.25,
+            dmg: 0.2,
           },
-          { label: '"T...tolong..."(bisik pelan)', category: "RAGU", dmg: 0.1 },
-          { label: "(diam, ketakutan)", category: "BAHAYA", dmg: 0 },
+          { label: '"Mmm... bentar ya"', category: "RAGU", dmg: 0.1 },
+          { label: '"Iya om, makasih..."', category: "BAHAYA", dmg: 0 },
         ],
       },
       {
-        bossText:
-          '"Kamu tahu sendiri kan siapa orang paling berkuasa di sini. Tidak ada yang akan percaya kamu!"',
+        // Fase B
+        bossText: '"Kamu cantik ya, pacar mana? Mau om temenin?"',
         choices: [
           {
-            label: '"Saya PERCAYA diri sendiri — TOLONG!!"',
+            label: '"JANGAN GANGGU SAYA!" (langkah mundur)',
             category: "AMAN",
-            dmg: 0.25,
+            dmg: 0.2,
           },
-          { label: '"Kenapa begitu..."', category: "RAGU", dmg: 0.1 },
-          { label: "(menangis diam)", category: "BAHAYA", dmg: 0 },
+          {
+            label: '"Tidak punya om..."(malu-malu)',
+            category: "RAGU",
+            dmg: 0.1,
+          },
+          { label: '"Boleh deh om..."', category: "BAHAYA", dmg: 0 },
         ],
       },
       {
+        // Fase C
         bossText:
-          '"Ini rahasia kita. Kalau kamu cerita, kamu yang akan kena masalah!"',
+          '"Rahasia ya kita, jangan bilang orang tua! Mereka pasti marah."',
         choices: [
           {
-            label: '"Bohong! Saya AKAN CERITA ke guru!"',
+            label: '"Saya PASTI cerita ke orang tua saya!"',
             category: "AMAN",
-            dmg: 0.25,
+            dmg: 0.2,
           },
+          { label: '"Emm... oke deh om..."', category: "BAHAYA", dmg: 0 },
           {
-            label: '"Mungkin memang salah saya..."',
-            category: "BAHAYA",
-            dmg: 0,
-          },
-          {
-            label: '"Saya tidak tahu harus apa..."',
+            label: '"Saya tidak tahu harus bagaimana..."',
             category: "RAGU",
             dmg: 0.1,
           },
         ],
       },
       {
-        bossText: '"Sudah, ikut saja. Aku janji tidak akan menyakiti kamu~"',
+        // Fase D
+        bossText:
+          '"Foto dong bentar. Untuk kenang-kenangan aja~ Cantik soalnya!"',
         choices: [
           {
-            label: "📢 TERIAK PALING KERAS! TOLONG!!! 🆘",
+            label: "📸 Screenshot pesan ini + LARI!",
+            category: "AMAN",
+            dmg: 0.2,
+          },
+          {
+            label: '"Tidak mau om..."(tapi diam ditempat)',
+            category: "RAGU",
+            dmg: 0.1,
+          },
+          {
+            label: '"Bentar ya om, satu foto aja..."',
+            category: "BAHAYA",
+            dmg: 0,
+          },
+        ],
+      },
+      {
+        // Fase E — Final
+        bossText:
+          '"Cepat dong! Ikut saja sama om. Dijamin aman kok, nggak usah takut!"',
+        choices: [
+          { label: "(Diam, badan membeku...)", category: "BAHAYA", dmg: 0 },
+          {
+            label: '"Mmm... makasih om tapi nggak usah..."',
+            category: "RAGU",
+            dmg: 0.1,
+          },
+          {
+            label: '"JANGAN DEKATI SAYA! TOLONG!!! TOLONG!!!"',
             category: "AMAN",
             dmg: 0.3,
+            points: 300,
+          },
+          {
+            label: "🆘 PANIC BUTTON — Teriak + Lari!",
+            category: "AMAN",
+            dmg: 0.4,
             isPanic: true,
           },
-          { label: '"Sebentar saja ya..."', category: "BAHAYA", dmg: 0 },
-          { label: '"Saya mau kabur dulu..."', category: "RAGU", dmg: 0.1 },
         ],
       },
     ];
@@ -937,7 +1121,7 @@ class Day3 extends Phaser.Scene {
       lbl.on("pointerover", () => lbl.setAlpha(0.7));
       lbl.on("pointerout", () => lbl.setAlpha(1.0));
       lbl.on("pointerdown", () => {
-        GameState.addChoice(3, c.label, c.category);
+        GameState.addChoice(3, c.label, c.category, c.points);
         if (c.category === "BAHAYA") GameState.loseLife();
         if (!GameState.isAlive()) {
           this._goGameOver();
@@ -975,7 +1159,7 @@ class Day3 extends Phaser.Scene {
       .forEach((c) => c.destroy());
     this.phase = "panic";
     this.panicUsed = true;
-    GameState.earnAchievement("Panic Button Hero");
+    GameState.earnAchievement("Pahlawan Diri Sendiri");
 
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
@@ -1311,9 +1495,37 @@ class Day3 extends Phaser.Scene {
       }
     }
 
-    // Voice accumulate saat boss fight
+    // Voice accumulate saat boss fight — isi penuh = damage ke boss
     if (this.phase === "boss_dialog" && voiceMeter.isShout()) {
       this.voiceAccum += delta;
+      if (this.voiceAccum >= this.voiceTarget) {
+        this.voiceAccum = 0;
+        this.bossMental = Math.max(0, this.bossMental - 0.2);
+        AudioManager.sfxBossHit();
+        AudioManager.sfxBossGroan();
+        this.cameras.main.shake(220, 0.009);
+        // Feedback teks
+        const fb = this.add
+          .text(CFG.WIDTH / 2, CFG.HEIGHT * 0.47, "🔊 SUARA KUAT! -20%", {
+            fontFamily: "Arial",
+            fontSize: "16px",
+            color: "#FFD700",
+            fontStyle: "bold",
+            stroke: "#000",
+            strokeThickness: 3,
+          })
+          .setOrigin(0.5)
+          .setScrollFactor(0)
+          .setDepth(200);
+        this.tweens.add({
+          targets: fb,
+          y: fb.y - 45,
+          alpha: 0,
+          duration: 1200,
+          onComplete: () => fb.destroy(),
+        });
+        if (this.bossMental <= 0) this._bossDies();
+      }
     }
   }
 }
