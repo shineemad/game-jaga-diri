@@ -24,7 +24,7 @@ class Prolog2 extends Phaser.Scene {
       {
         bg: 0x8b5e3c,
         title: "Yang Perlu Rara Tahu",
-        text: "🔴 Tubuhmu adalah milikmu sendiri.\n🔴 Bagian privat tidak boleh disentuh orang lain.\n🔴 Jika ada pesan mencurigakan di HP:\n     Jangan balas — Lapor orang dewasa!",
+        text: "🔴 Tubuhmu = milikmu! Nggak ada yang boleh sembarangan.\n🔴 Area privat NGGAK BOLEH disentuh orang lain.\n🔴 Ada pesan mencurigakan di HP?\n     Jangan balas — Langsung lapor ke ortu!",
         img: "info",
       },
     ];

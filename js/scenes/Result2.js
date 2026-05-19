@@ -81,12 +81,12 @@ class Result2 extends Phaser.Scene {
       .on("pointerout", () => recapBtnG.setAlpha(1));
 
     const tips = [
-      "• Bagian privat tubuhmu = bagian tertutup pakaian renang",
-      "• Tidak ada yang boleh memotret/menyentuh area privat",
-      "• Groomer sering minta rahasiakan percakapan — ini BAHAYA",
-      "• Jika ada pesan aneh di HP → screenshot → lapor ke orang tua",
-      "• Gunakan fitur BLOCK & LAPOR di aplikasi pesan",
-      "• Kamu TIDAK bersalah jika diganggu secara digital",
+      "• Bagian privat = bagian tubuh yang tertutup pakaian renang",
+      "• Nggak ada yang boleh motret/sentuh area privat kamu",
+      "• Groomer sering minta rahasiain obrolan — itu BAHAYA!",
+      "• Ada pesan aneh di HP? → screenshot → ceritain ke ortu",
+      "• Pakai fitur BLOKIR & LAPORKAN di aplikasi pesan",
+      "• Kamu NGGAK bersalah kalau diganggu secara digital",
     ];
     tips.forEach((t, i) => {
       this.add.text(35, 153 + i * 32, t, {

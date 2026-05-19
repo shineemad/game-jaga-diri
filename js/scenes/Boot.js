@@ -41,13 +41,13 @@ class Boot extends Phaser.Scene {
 
     // Tips keselamatan acak
     const tips = [
-      "💡 Jangan pernah ikut orang yang tidak kamu kenal!",
-      "📢 Berteriaklah KERAS jika merasa tidak aman!",
-      "📱 Nomor darurat: Polisi 110 | Kemensos 129",
-      "🛡 Ceritakan ke orang tua jika ada yang mencurigakan!",
+      "💡 Jangan pernah ikut orang yang nggak kamu kenal!",
+      "📢 TERIAK KERAS kalau ngerasa nggak aman!",
+      "📱 Darurat: Polisi 110 | Hotline Anak 129",
+      "🛡 Ceritain ke ortu kalau ada yang mencurigakan!",
       "🚫 Jangan terima hadiah atau makanan dari orang asing!",
-      "🏃 Lari ke tempat ramai jika dikejar atau diancam!",
-      "📸 Screenshot bukti jika ada pesan mencurigakan di HP!",
+      "🏃 Lari ke tempat rame kalau dikejar atau diancam!",
+      "📸 Screenshot bukti kalau ada pesan mencurigakan di HP!",
     ];
     const tip = tips[Math.floor(Math.random() * tips.length)];
     this.add

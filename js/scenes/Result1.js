@@ -89,11 +89,11 @@ class Result1 extends Phaser.Scene {
       .on("pointerout", () => recapBtnG.setAlpha(1));
 
     const flags = [
-      "• Orang asing mengajakmu ikut tanpa izin orang tua",
-      "• Seseorang menawarkan hadiah/makanan secara berlebihan",
-      "• Orang dewasa yang minta rahasiakan pertemuan kalian",
-      "• Ada yang menyentuh tubuhmu tanpa izin — TERIAK & LARI!",
-      "• Jangan lewati gang sepi sendirian — pilih jalan ramai",
+      "• Orang asing ngajak kamu pergi tanpa izin ortu",
+      "• Ada yang nawarin hadiah atau makanan berlebihan",
+      "• Orang dewasa minta rahasiain pertemuan kalian — 🚩",
+      "• Ada yang sentuh tubuhmu tanpa izin — TERIAK & LARI!",
+      "• Jangan lewatin gang sepi sendirian — pilih jalan rame!",
     ];
     flags.forEach((f, i) => {
       this.add.text(35, 155 + i * 34, f, {
@@ -108,7 +108,7 @@ class Result1 extends Phaser.Scene {
       .text(
         W / 2,
         332,
-        `📍 Jika ada yang mengancammu:\nHotline Polisi 110 | SAPA Anak 129`,
+        `� Kalau ada yang ngancam kamu:\nPolisi 110 | Hotline Anak 129 | KPAI 021-31901556`,
         {
           fontFamily: "Arial",
           fontSize: "12px",

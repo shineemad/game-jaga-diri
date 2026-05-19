@@ -54,7 +54,7 @@ class GameOver extends Phaser.Scene {
       .text(
         W * 0.35,
         H * 0.22,
-        `Rara tidak selamat di Hari ${this._fromDay}.\nJangan menyerah!\nSetiap kesalahan adalah\npelajaran berharga.`,
+        `Rara nggak selamat di Hari ${this._fromDay}...\nTapi jangan nyerah!\nSetiap kesalahan adalah\npelajaran berharga! 💪`,
         {
           fontFamily: "Arial",
           fontSize: "13px",
@@ -85,9 +85,9 @@ class GameOver extends Phaser.Scene {
       .setDepth(5);
 
     const tips = [
-      "• Bersuara keras dan minta bantuan saat terancam",
-      "• Jangan menerima ajakan dari orang yang tidak dikenal",
-      "• Ceritakan pada orang tua jika ada yang membuatmu tidak nyaman",
+      "• TERIAK keras dan minta bantuan kalau lagi terancam!",
+      "• Jangan ikut ajakan orang yang nggak kamu kenal",
+      "• Ceritain ke ortu kalau ada yang bikin kamu nggak nyaman",
     ];
     tips.forEach((t, i) => {
       this.add

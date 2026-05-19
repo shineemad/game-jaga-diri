@@ -18,7 +18,7 @@ class Prolog1 extends Phaser.Scene {
         bg: 0x5ba0c8,
         img: "street",
         title: "Kenali Batas",
-        text: "Di luar rumah, banyak orang lalu-lalang.\nTidak semua orang asing bisa dipercaya.\nRara harus waspada dan berani bersuara\njika ada yang membuatnya tidak nyaman.",
+        text: "Di luar rumah, banyak orang lalu-lalang.\nNggak semua orang asing bisa dipercaya!\nRara harus tetap waspada dan berani bersuara\nkalau ada yang bikin dia nggak nyaman.",
       },
       {
         bg: 0x4a7a9b,
