@@ -581,7 +581,7 @@ class Day2 extends Phaser.Scene {
         {
           speaker: "Pria Asing",
           portrait: "shadow",
-          text: '"Cantik ya! FB-nya berapa dek? 😊\nOm bisa antar ke sekolah kok — gratis, nggak usah naik angkot!"',
+          text: '"Cantik ya! Kasih nomor WA-nya dong, dek? 😊\nOm bisa antar ke sekolah kok — gratis, nggak usah naik angkot!"',
         },
         {
           speaker: "Rara (dalam hati)",

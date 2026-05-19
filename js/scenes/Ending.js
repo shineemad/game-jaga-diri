@@ -125,7 +125,9 @@ class Ending extends Phaser.Scene {
         "Meski sempat tergoda jalan sepi, Rara berhasil waspada dan selamat.",
       );
     } else {
-      story.push("Dia ceritain semua kejadian ke ortu dan guru. Berani banget!");
+      story.push(
+        "Dia ceritain semua kejadian ke ortu dan guru. Berani banget!",
+      );
     }
     if (GameState.platChecked) {
       story.push(

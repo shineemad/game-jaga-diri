@@ -1644,8 +1644,17 @@ class Day3 extends Phaser.Scene {
     helperGfx.fillStyle(0x336633);
     helperGfx.fillRect(W * 0.88 - 14, H * 0.48 + 8, 28, 30);
 
-    // Boss kabur
-    DrawUtils.shadowNpc(this.charGfx, W * 0.65, H * 0.45, true);
+    // Boss kabur — objek terpisah supaya bisa di-tween
+    const bossFleeGfx = this.add.graphics().setDepth(12);
+    DrawUtils.shadowNpc(bossFleeGfx, W * 0.65, H * 0.45, true);
+    this.tweens.add({
+      targets: bossFleeGfx,
+      x: W * 0.5,
+      alpha: 0,
+      duration: 900,
+      ease: "Power2",
+      onComplete: () => bossFleeGfx.destroy(),
+    });
 
     this.tweens.add({
       targets: helperGfx,

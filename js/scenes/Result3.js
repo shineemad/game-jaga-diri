@@ -132,7 +132,7 @@ class Result3 extends Phaser.Scene {
         ? "Luar biasa! Rara selamat tanpa satu pun pilihan bahaya.\nKamu adalah Pahlawan Sejati! 🦦"
         : amanCnt >= bahayaCnt
           ? "Kerja bagus! Rara berhasil selamat. Terus belajar\nuntuk lebih waspada dalam kehidupan nyata."
-          : "Rara membutuhkan lebih banyak latihan. Jangan menyerah!\nBicarakan dengan orang dewasa yang kamu percaya.";
+          : "Rara masih butuh banyak latihan. Tapi jangan nyerah!\nCeritain ke orang dewasa yang kamu percaya ya!";
 
     this.add
       .text(W / 2, 262, msg, {
@@ -149,7 +149,7 @@ class Result3 extends Phaser.Scene {
       .text(
         W / 2,
         310,
-        "☎ Darurat: Polisi 110 | KPAI 021-31901556 | Kemensos 129",
+        "☎ Darurat: Polisi 110 | KPAI 021-31901556 | Hotline Anak 129",
         {
           fontFamily: "Arial",
           fontSize: "12px",
