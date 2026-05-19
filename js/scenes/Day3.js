@@ -305,12 +305,17 @@ class Day3 extends Phaser.Scene {
             {
               speaker: "Narasi",
               portrait: "rara",
-              text: "Bel pulang berbunyi di SMP Harapan.\nHari ini hujan deras dan Ibu Rara tidak bisa menjemput.\nRara harus pulang sendiri ke rumah.",
+              text: "Bel pulang udah bunyi di SMP Harapan! 🔔\nTapi hujan deras banget hari ini...\nIbu Rara nggak bisa jemput. Rara harus pulang sendiri.",
             },
             {
               speaker: "Rara",
               portrait: "rara",
-              text: '"Tidak apa-apa... aku pesan ojol saja lewat HP.\nParkirannya ada di ujung jalan, tidak terlalu jauh."',
+              text: '"Yah... tapi nggak apa-apa kok! 😤\nAku udah pesen ojol lewat HP.\nTinggal jalan dikit ke parkiran deh."',
+            },
+            {
+              speaker: "Narasi",
+              portrait: "rara",
+              text: "Tap layar / TERIAK buat jalan ke parkiran!\nSemakin keras teriak = makin cepet jalannya! 🏃",
             },
           ],
           () => {
@@ -508,12 +513,12 @@ class Day3 extends Phaser.Scene {
           {
             speaker: "Narasi",
             portrait: "rara",
-            text: "Rara tiba di parkiran — basah karena hujan!\nDia membuka HP untuk mengecek ojol yang sudah dipesan...",
+            text: "Rara akhirnya sampai di parkiran. Basah kuyup kena hujan! 😅\nDia langsung buka HP buat ngecek ojol-nya udah nyampe belum...",
           },
           {
             speaker: "Rara",
             portrait: "rara",
-            text: '"Eh?! Tiba-tiba ada pesan masuk dari nomor tidak dikenal...\n*Jantung Rara berdebar tidak enak.*"',
+            text: '"Eh?! Ada notif dari nomor yang nggak aku kenal?! 😨\nSiapa nih... *deg-degan banget*"',
           },
         ],
         () => {
@@ -541,18 +546,18 @@ class Day3 extends Phaser.Scene {
         from: "choice",
         choices: [
           {
-            label: "📸 Balas dengan foto seragam",
+            label: "📸 Oke, ini foto seragamku~",
             category: "BAHAYA",
             penalty: true,
-            edu: "Jangan kirim foto ke orang tidak dikenal!\nFoto bisa disalahgunakan untuk memeras atau mengancam.",
+            edu: "STOP! Jangan kirim foto ke orang yang nggak kamu kenal!\nFoto bisa dipakai buat ngemerasa atau ngancam kamu!",
           },
           {
-            label: "🚗 Iya om, jemput di sini ya!",
+            label: "🚗 Iya Om, aku di parkiran SMP. Jemput ya!",
             category: "BAHAYA",
             gameOver: true,
           },
           {
-            label: "🚫 Blokir & Lapor orang tua sekarang!",
+            label: "🚫 BLOKIR sekarang + lapor ke ortu!",
             category: "AMAN",
             points: 200,
             onPick: () => {
@@ -561,7 +566,7 @@ class Day3 extends Phaser.Scene {
             },
           },
           {
-            label: "📸 Screenshot dulu sebagai bukti (+100)",
+            label: "� Screenshot dulu buat bukti... baru lapor",
             category: "RAGU",
             points: 100,
             onPick: () => {
@@ -590,7 +595,7 @@ class Day3 extends Phaser.Scene {
           {
             speaker: "Narasi",
             portrait: "rara",
-            text: "Rara berhasil mengatasi pesan berbahaya itu!\nOjol pesanan Rara sudah tiba di parkiran.\nTapi sebelum naik, Rara HARUS cek plat nomor dulu!",
+            text: "Yes! Rara berhasil, nggak terpancing pesan mencurigakan itu! 💪\nNah, ojol pesanan Rara baru aja tiba di parkiran!\nTapi jangan langsung naik — cek plat nomor dulu ya!",
           },
         ],
         () => {
@@ -690,7 +695,7 @@ class Day3 extends Phaser.Scene {
     DrawUtils.sulselBorder(panG, 15, PANEL_Y, W - 30, 228, 0.7);
 
     this.add
-      .text(W / 2, PANEL_Y + 14, "Rara harus memilih tindakan yang tepat!", {
+      .text(W / 2, PANEL_Y + 14, "Pilih respons Rara yang paling tepat!", {
         fontFamily: "Arial",
         fontSize: "13px",
         color: "#FF8888",
@@ -806,7 +811,7 @@ class Day3 extends Phaser.Scene {
             .text(
               W / 2,
               H / 2 - 36,
-              "Rara naik kendaraan orang tidak dikenal!\nJangan pernah terima tawaran jemput dari stranger!",
+              "Rara pergi sama orang nggak dikenal dari internet! 😱\nJangan PERNAH kasih lokasi atau minta dijemput orang asing!",
               {
                 fontFamily: "Arial",
                 fontSize: "13px",
@@ -980,7 +985,7 @@ class Day3 extends Phaser.Scene {
       .text(
         W / 2,
         85,
-        "Pesanan ojol Rara memiliki plat: DD 3472 WK\nMana yang cocok?",
+        "Di aplikasi, plat ojol Rara: DD 3472 WK\nPilih motor yang platnya SAMA ya!",
         {
           fontFamily: "Arial",
           fontSize: "14px",
@@ -1063,7 +1068,7 @@ class Day3 extends Phaser.Scene {
         .text(
           W / 2,
           H / 2 + 30,
-          "Selalu cek plat nomor sebelum naik ojol!\nTelepon driver terlebih dahulu untuk konfirmasi.",
+          "Selalu cocokin plat di aplikasi sama plat di motor!\nKalau beda, jangan naik! Telpon driver dulu buat konfirmasi.",
           {
             fontFamily: "Arial",
             fontSize: "14px",
@@ -1127,17 +1132,17 @@ class Day3 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: 'Rara baru saja mau naik ojol ketika seseorang tiba-tiba menghalangi jalannya!\nOrang itu... adalah "Si Bayangan Gelap" —\npengirim pesan-pesan berbahaya tadi yang kini muncul langsung di depan Rara!',
+          text: 'TUNGGU! Rara mau naik ojol...\ntapi seseorang tiba-tiba menghadang jalannya! 😱\nItu dia — si pengirim pesan tadi — muncul langsung di depan Rara!!',
         },
         {
           speaker: "Si Bayangan Gelap",
           portrait: "boss",
-          text: '"Hei, mau kemana sendirian? Ikut aku dulu.\nAda yang perlu kita bicarakan, sebentar saja~"',
+          text: '"Eh hei, mau kemana sendirian? 😏\nIkut aku dulu deh. Sebentar aja kok~"',
         },
         {
           speaker: "Rara",
           portrait: "rara",
-          text: '"Aku... aku tidak kenal kamu! Minggir!"\n\nRara ingat pelajarannya — DIAM = BAHAYA.\nDia harus BERSUARA KERAS dan MINTA TOLONG!',
+          text: '"Aku... AKU NGGAK KENAL KAMU! MINGGIR!! 😤"\n\nRara ingat: DIAM ITU BAHAYA!\nDia harus TERIAK SEKERAS-KERASNYA dan MINTA TOLONG!',
         },
       ],
       () => {
@@ -1154,8 +1159,8 @@ class Day3 extends Phaser.Scene {
     AudioManager.startBGM(100, "boss");
     // Fix #8: Tutorial modal sebelum boss fight
     this._showInlineTutorial(
-      "\ud83d\udc4a HADAPI SI BAYANGAN!",
-      "Pilih kata-kata terkuat untuk melawan ancaman.\n\nTahan tombol TERIAK! untuk mengisi gauge suara.\nJika gauge suara penuh = Si Bayangan pergi!\n\nPilihan AMAN lebih efektif menguras mentalnya.",
+      "👊 LAWAN SI BAYANGAN!",
+      "Pilih kata-kata yang PALING BERANI buat melawan!\n\nTahan tombol TERIAK! buat isi gauge suara.\nGauge penuh? Si Bayangan langsung kabur! 💨\n\nPilihan HIJAU (AMAN) paling ampuh nguras nyalinya!",
       () => {
         this.bossMental = 1.0;
         this.voiceAccum = 0;
@@ -1213,7 +1218,7 @@ class Day3 extends Phaser.Scene {
     btnG.strokeRoundedRect(W / 2 - 75, H / 2 + 78, 150, 32, 10);
     tutObjs.push(btnG);
     const btnLbl = this.add
-      .text(W / 2, H / 2 + 94, "\u26a1 SIAP MELAWAN!", {
+      .text(W / 2, H / 2 + 94, "⚡ SIAP! AYO LAWAN! 💪", {
         fontFamily: "Arial",
         fontSize: "14px",
         color: "#FF8888",
@@ -1243,20 +1248,20 @@ class Day3 extends Phaser.Scene {
     return [
       {
         bossText:
-          '"Jangan teriak-teriak, nanti kamu dimarahi orang. Diam saja!"',
+          '"Sssst! Jangan teriak-teriak, nanti kamu yang dimarahin orang. Diam aja ya~"',
         choices: [
           {
-            label: '"JANGAN DEKAT! TOLONG!!" 📢 (Voice KERAS)',
+            label: '"JANGAN DEKET-DEKET! TOLONG!! 🔊" (Teriak KERAS!)',
             category: "AMAN",
             dmg: 0.25,
           },
           {
-            label: '"T...tolong..." (suara gemetar)',
+            label: '"T-tolong..." (suaranya hampir nggak kedengeran)',
             category: "RAGU",
             dmg: 0.1,
           },
           {
-            label: "(diam ketakutan, tidak bersuara)",
+            label: "(beku di tempat, nggak bisa ngomong...)",
             category: "BAHAYA",
             dmg: 0,
           },
@@ -1264,20 +1269,20 @@ class Day3 extends Phaser.Scene {
       },
       {
         bossText:
-          '"Kamu tahu sendiri kan siapa orang paling berkuasa di sini. Tidak ada yang akan percaya kamu!"',
+          '"Haha, emangnya siapa yang bakal percaya sama kamu? Nggak ada! Diam aja~"',
         choices: [
           {
-            label: '"PERGI! Saya PERCAYA DIRI SENDIRI — TOLONG!!" 💪',
+            label: '"PERGI! Aku PERCAYA SAMA DIRI SENDIRI! TOLONG!! 💪"',
             category: "AMAN",
             dmg: 0.25,
           },
           {
-            label: '"Kenapa begitu..." (ragu-ragu)',
+            label: '"Emangnya... kenapa sih?" (masih ragu-ragu)',
             category: "RAGU",
             dmg: 0.1,
           },
           {
-            label: "(menangis diam, tidak berbuat apa-apa)",
+            label: "(nangis diem-diem, nggak berani berbuat apa-apa)",
             category: "BAHAYA",
             dmg: 0,
           },
@@ -1285,60 +1290,60 @@ class Day3 extends Phaser.Scene {
       },
       {
         bossText:
-          '"Ini rahasia kita. Kalau kamu cerita, kamu yang akan kena masalah!"',
+          '"Ini rahasia kita berdua ya. Kalau kamu ngadu — kamu sendiri yang bakal kena masalah!"',
         choices: [
           {
-            label: '"Bohong! Saya AKAN CERITA ke guru sekarang!" 🔊',
+            label: '"Bohong! AKU BAKAL CERITA ke guru sekarang! 🔊"',
             category: "AMAN",
             dmg: 0.25,
           },
           {
-            label: '"Mungkin memang salah saya..." (menyerah)',
+            label: '"Mungkin... emang salah aku ya..." (mulai pasrah)',
             category: "BAHAYA",
             dmg: 0,
           },
           {
-            label: '"Saya tidak tahu harus apa..." (bingung)',
+            label: '"Aku nggak tau harus ngapain..." (bingung banget)',
             category: "RAGU",
             dmg: 0.1,
           },
         ],
       },
       {
-        bossText: '"Sudah, ikut saja. Aku janji tidak akan menyakiti kamu~"',
+        bossText: '"Udah deh, ikut aja. Aku janji nggak bakal nyakitin kamu kok~"',
         choices: [
           {
-            label: '"JANGAN SENTUH SAYA! TOLONG!!! 🆘" (Voice MAX)',
+            label: '"JANGAN SENTUH AKU!! TOLONG!!! 🆘" (Voice MAX)',
             category: "AMAN",
             dmg: 0.3,
             isPanic: true,
           },
           {
-            label: '"Sebentar saja ya..." (pasrah)',
+            label: '"Se-sebentar aja ya..." (hampir menyerah)',
             category: "BAHAYA",
             dmg: 0,
           },
-          { label: '"Saya mau kabur dulu..."', category: "RAGU", dmg: 0.1 },
+          { label: '"A-aku mau kabur..." (tapi nggak tau caranya)', category: "RAGU", dmg: 0.1 },
         ],
       },
       // GDD Stage E: Ronde Final — Panic Button
       {
         bossText:
-          '"Sudah pasrah saja! Tidak ada yang bisa menolong kamu di sini!"',
+          '"Pasrah aja lah! Nggak ada yang bisa nolongin kamu di sini!"',
         choices: [
           {
-            label: "📢 Voice MAX + TERIAK PALING KERAS!! TOLONG!!! 🆘",
+            label: "📢 TERIAK SEKERAS-KERASNYA!! TO-LONG!!! 🆘 (Voice MAX!!)",
             category: "AMAN",
             dmg: 0.35,
             isPanic: true,
           },
           {
-            label: '"Tolong..." (berbisik, hampir menyerah)',
+            label: '"T-tolong..." (berbisik, hampir menyerah...)',
             category: "RAGU",
             dmg: 0.1,
           },
           {
-            label: "(pasrah, berhenti melawan)",
+            label: "(pasrah total... nggak ada tenaga lagi buat melawan)",
             category: "BAHAYA",
             dmg: 0,
           },
@@ -1392,7 +1397,7 @@ class Day3 extends Phaser.Scene {
       .text(
         W / 2,
         H * 0.3,
-        `Ronde ${this.bossDialog + 1} / ${this._bossRounds.length}`,
+        `⚔️ Ronde ${this.bossDialog + 1} dari ${this._bossRounds.length}`,
         {
           fontFamily: "Arial",
           fontSize: "13px",
@@ -1444,15 +1449,39 @@ class Day3 extends Phaser.Scene {
           return;
         }
         this.bossMental = Math.max(0, this.bossMental - (c.dmg || 0));
-        // Feature #12: SFX + camera shake berdasarkan pilihan
+        // SFX + camera shake + floating reaction text
         if (c.category === "AMAN") {
           AudioManager.sfxBossHit();
           AudioManager.sfxBossGroan();
           this.cameras.main.shake(180, 0.007);
+          const hitTxt = this.add
+            .text(W * 0.68, H * 0.28, `💥 -${Math.round((c.dmg || 0) * 100)}% Mental!`, {
+              fontFamily: "Arial", fontSize: "16px", color: "#FFD700",
+              fontStyle: "bold", stroke: "#000", strokeThickness: 3,
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
+          this.tweens.add({ targets: hitTxt, y: H * 0.12, alpha: 0, duration: 1000, onComplete: () => hitTxt.destroy() });
+          const reactTxt = this.add
+            .text(W * 0.2, H * 0.42, "💪 BERANI!", {
+              fontFamily: "Arial", fontSize: "14px", color: "#44FF88",
+              fontStyle: "bold", stroke: "#000", strokeThickness: 2,
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
+          this.tweens.add({ targets: reactTxt, y: H * 0.32, alpha: 0, duration: 900, delay: 100, onComplete: () => reactTxt.destroy() });
         } else if (c.category === "RAGU") {
           AudioManager.sfxNeutral();
+          const raguTxt = this.add
+            .text(W * 0.5, H * 0.35, "😟 Kurang kuat...", {
+              fontFamily: "Arial", fontSize: "14px", color: "#FFD700",
+              stroke: "#000", strokeThickness: 2,
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
+          this.tweens.add({ targets: raguTxt, y: H * 0.25, alpha: 0, duration: 900, onComplete: () => raguTxt.destroy() });
         } else {
           AudioManager.sfxWrong();
+          const badTxt = this.add
+            .text(W * 0.5, H * 0.38, "😨 Bahaya! -1 ❤", {
+              fontFamily: "Arial", fontSize: "14px", color: "#FF4444",
+              fontStyle: "bold", stroke: "#000", strokeThickness: 2,
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
+          this.tweens.add({ targets: badTxt, y: H * 0.28, alpha: 0, duration: 900, onComplete: () => badTxt.destroy() });
         }
         if (c.isPanic) {
           this._triggerPanicButton();
@@ -1513,7 +1542,7 @@ class Day3 extends Phaser.Scene {
     });
 
     this.add
-      .text(W / 2, H / 2 + 75, "TEKAN TOMBOL PANIK!", {
+      .text(W / 2, H / 2 + 75, "TAP TOMBOL PANIK!! 🆘", {
         fontFamily: "Arial",
         fontSize: "16px",
         color: "#FFD700",
@@ -1568,17 +1597,17 @@ class Day3 extends Phaser.Scene {
         {
           speaker: "Pak Guru & Polisi",
           portrait: "polisi",
-          text: '"Hei! Ada apa di sini?! Kami dengar kamu teriak!"\n\nSi Bayangan Gelap lari terbirit-birit melihat guru dan polisi datang!',
+          text: '"HEEEI! Ada apa ini?! Kami denger ada yang teriak!" 🚔\n\nSi Bayangan Gelap langsung kabur terbirit-birit! Pengecut!',
         },
         {
           speaker: "Rara",
           portrait: "rara",
-          text: '"Pak Guru, tadi ada orang yang mengancam saya!\nDia kirim pesan berbahaya ke HP ku, lalu menghadang di parkiran!"\n\nRara memberanikan diri untuk bercerita. Ini keputusan terbaik!',
+          text: '"Pak Guru! Tadi ada orang asing yang ngancam aku!\nDia kirim pesan-pesan aneh ke HP-ku, terus tiba-tiba ngadang di sini!"\n\nRara berani cerita! Ini pilihan PALING TEPAT! 💪',
         },
         {
           speaker: "Pak Guru & Polisi",
           portrait: "polisi",
-          text: '"Tenang Rara, kamu sudah sangat berani! Kamu tidak salah.\nKami akan bantu lapor ke pihak berwajib. Makasih sudah bilang ki!"',
+          text: '"Tenang Rara, kamu udah berani banget! Kamu nggak salah sama sekali.\nKami bakal bantu laporin ke polisi. Makasih ya udah mau cerita!"',
         },
       ],
       () => {
@@ -1639,15 +1668,15 @@ class Day3 extends Phaser.Scene {
     const content = [
       {
         h: "⚠ Apa itu Grooming?",
-        b: "Grooming adalah manipulasi oleh orang dewasa untuk mendekati\nanak secara tidak sehat — online maupun offline.",
+        b: "Grooming = orang dewasa 'mendekati' anak secara nggak sehat\n— bisa lewat chat, sosmed, atau langsung. Ini KEJAHATAN!",
       },
       {
-        h: "🦁 Kamu Bisa Melawan!",
-        b: "• Berteriak KERAS jika terancam\n• Tekan Panic Button / minta bantuan orang terdekat\n• Ceritakan kepada orang tua, guru, atau polisi SEGERA",
+        h: "🦁 Kamu BISA Melawan!",
+        b: "• Teriak KERAS kalau terancam — minta tolong!\n• Hubungi orang terdekat / tekan tombol darurat\n• Cerita ke ortu, guru, atau polisi. Jangan pendam sendiri!",
       },
       {
         h: "📣 INGAT SELALU:",
-        b: "Kamu TIDAK PERNAH bersalah jika menjadi korban.\nBerani bercerita adalah tindakan PALING BERANI!",
+        b: "Kamu NGGAK PERNAH salah kalau jadi korban.\nBerani cerita = tindakan PALING KEREN yang bisa kamu lakuin!",
       },
     ];
     let y = 70;
@@ -1746,9 +1775,9 @@ class Day3 extends Phaser.Scene {
     );
 
     const tips = [
-      "🚫 Jangan pernah ikut orang asing,\n    apapun alasan yang mereka berikan.",
-      "📢 Jika terancam: TERIAK KERAS, LARI\n    ke tempat ramai, CARI orang dewasa!",
-      "📱 Nomor darurat: Polisi 110\n    Kemensos 129 | KPAI 021-31901556",
+      "🚫 Jangan pernah ikut orang asing —\n    apapun alasan & janji yang mereka kasih!",
+      "📢 Kalau terancam: TERIAK KERAS, LARI\n    ke tempat rame, CARI orang dewasa!",
+      "📱 Darurat: Polisi 110\n    Hotline Anak 129 | KPAI 021-31901556",
     ];
     tips.forEach((t, i) => {
       objs.push(
