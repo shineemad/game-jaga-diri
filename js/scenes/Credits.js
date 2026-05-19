@@ -49,7 +49,11 @@ class Credits extends Phaser.Scene {
       { t: "" },
       { t: "❤ Nomor Darurat", s: "bold", c: "#FF8888" },
       { t: "Hotline Anak (KEMENPPPA) : 129", s: "normal", c: "#FFAAAA" },
-      { t: "KPAI                     : 021-31901556", s: "normal", c: "#FFAAAA" },
+      {
+        t: "KPAI                     : 021-31901556",
+        s: "normal",
+        c: "#FFAAAA",
+      },
       { t: "Polisi                   : 110", s: "normal", c: "#FFAAAA" },
       { t: "" },
       { t: "❤ Teknologi", s: "bold", c: "#FFD700" },

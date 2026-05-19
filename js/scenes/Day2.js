@@ -529,9 +529,11 @@ class Day2 extends Phaser.Scene {
     if (this._walkHintTxt) {
       const dist = Math.max(0, Math.round((950 - this._walkX) / 10));
       this._walkHintTxt.setText(
-        dist > 0
-          ? `➔ Halte ${dist * 10}px lagi...  (TERIAK untuk berlari!)`
-          : "✓ Sampai di halte!",
+        dist > 5
+          ? `➔ Halte ${dist} m lagi...  (TERIAK untuk berlari!)`
+          : dist > 0
+            ? `➔ Halte ${dist * 100} cm lagi! Hampir sampai! 🏃`
+            : "✓ Sampai di halte!",
       );
     }
 
