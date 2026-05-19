@@ -401,12 +401,17 @@ class Day2 extends Phaser.Scene {
 
         // Petunjuk (scroll-fixed)
         this._walkHintTxt = this.add
-          .text(W / 2, 54, "➔ Jalan ke halte — TERIAK buat lari lebih cepat! 📢", {
-            ...CFG.F.SMALL,
-            color: "#FFD700",
-            stroke: "#000",
-            strokeThickness: 2,
-          })
+          .text(
+            W / 2,
+            54,
+            "➔ Jalan ke halte — TERIAK buat lari lebih cepat! 📢",
+            {
+              ...CFG.F.SMALL,
+              color: "#FFD700",
+              stroke: "#000",
+              strokeThickness: 2,
+            },
+          )
           .setOrigin(0.5)
           .setScrollFactor(0)
           .setDepth(20);
@@ -664,7 +669,7 @@ class Day2 extends Phaser.Scene {
     this._ddChoiceStart = GameState.choices.length; // snapshot sebelum quiz
     this._showInlineTutorial(
       "🧩 QUIZ: KENALI BATAS TUBUH!",
-      "Seret (drag) label bagian tubuh ke zona yang tepat!\n\n✅ ZONA AMAN = boleh disentuh teman & keluarga\n❌ ZONA BAHAYA = area privat, TIDAK boleh!\n\n⏰ Waktu: 15 detik — cepat!",
+      "Geser / drag nama bagian tubuh ke zona yang sesuai!\n\n✅ ZONA AMAN = boleh disentuh teman & keluarga\n❌ ZONA BAHAYA = area privat, NGGAK BOLEH!\n\n⏰ Waktu: 15 detik — cepat!",
       () => this._buildDragDropQuiz(),
     );
   }
@@ -1385,7 +1390,7 @@ class Day2 extends Phaser.Scene {
             points: 50,
           },
           {
-            label: "JANGAN GANGGU AKU! 👿",
+            label: "INI SIAPA?! JANGAN GANGGU AKU! 😡",
             category: "AMAN",
             points: 150,
             onPick: () => {

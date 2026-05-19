@@ -354,7 +354,7 @@ class Day3 extends Phaser.Scene {
       .text(
         W / 2,
         54,
-        "➔ Jalan ke parkiran sekolah... (TERIAK untuk berlari!)",
+        "➔ Jalan ke parkiran sekolah — TERIAK buat lari lebih cepat! 🏃",
         {
           ...CFG.F.SMALL,
           color: "#FFAAAA",
