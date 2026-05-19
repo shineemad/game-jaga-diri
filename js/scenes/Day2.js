@@ -590,6 +590,10 @@ class Day2 extends Phaser.Scene {
       ],
       () => {
         this.phase = "in_pete";
+        // Bersihkan label teks halte (dari _drawHalte & _drawWideStreet) sebelum masuk angkot
+        this.children.list
+          .filter((c) => c.type === "Text" && c.depth <= 5)
+          .forEach((c) => c.destroy());
         this._drawPeteInterior();
         this.charGfx.clear();
         DrawUtils.rara(
@@ -2289,15 +2293,42 @@ class Day2 extends Phaser.Scene {
             { label: "Diam dan berharap aman", category: "BAHAYA" },
           ],
         },
-        {
-          speaker: "Ibu Sopir",
-          portrait: "sopir",
-          text: '"Tenang dek, Ibu bantu. Ayo ke depan sama Ibu!"',
-        },
       ],
       () => {
-        this.phase = "educard";
-        this._showEduCard();
+        // Akhir cerita berbeda sesuai pilihan yang diambil
+        const lastChoice = GameState.choices[GameState.choices.length - 1];
+        const cat = lastChoice ? lastChoice.category : "BAHAYA";
+        if (cat !== "BAHAYA") {
+          // AMAN / RAGU: suara Rara terdengar, sopir datang membantu
+          this.dlg.show(
+            [
+              {
+                speaker: "Ibu Sopir",
+                portrait: "sopir",
+                text: '"Tenang dek, Ibu bantu. Ayo ke depan sama Ibu!"',
+              },
+            ],
+            () => {
+              this.phase = "educard";
+              this._showEduCard();
+            },
+          );
+        } else {
+          // BAHAYA: Rara diam — sopir tidak tahu ada masalah
+          this.dlg.show(
+            [
+              {
+                speaker: "Narasi",
+                portrait: "rara",
+                text: "Rara hanya bisa diam... Beruntung angkot tiba di sekolah tepat waktu.\n⚠ Ingat: bersuara keras adalah cara terbaik untuk minta bantuan!",
+              },
+            ],
+            () => {
+              this.phase = "educard";
+              this._showEduCard();
+            },
+          );
+        }
       },
     );
   }

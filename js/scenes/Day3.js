@@ -316,6 +316,11 @@ class Day3 extends Phaser.Scene {
     this._walkX = 80;
     this._walkBoosted = false;
 
+    // Fix #D3-2: Hapus text orphan dari _drawParkiranBackground() sebelum wide world
+    this.children.list
+      .filter((c) => c.type === "Text" && c.depth <= 5)
+      .forEach((c) => c.destroy());
+
     // Gambar dunia lebar (hujan)
     this.bgGfx.clear();
     this._drawWideRainWorld(worldW, H);
@@ -326,7 +331,7 @@ class Day3 extends Phaser.Scene {
     this._walkHintTxt = this.add
       .text(
         W / 2,
-        38,
+        54,
         "➔ Jalan ke parkiran sekolah... (TERIAK untuk berlari!)",
         {
           ...CFG.F.SMALL,
@@ -543,8 +548,21 @@ class Day3 extends Phaser.Scene {
   _showChatV2Msg() {
     const msgs = this._chatV2Msgs;
     if (this.chatV2Idx >= msgs.length) {
-      this.phase = "plat_check";
-      this._startPlatCheck();
+      // Fix #D3-4: Tambah narasi transisi sebelum Cek Plat Ojol
+      this.children.list.filter((c) => c._isChatV2).forEach((c) => c.destroy());
+      this.dlg.show(
+        [
+          {
+            speaker: "Narasi",
+            portrait: "rara",
+            text: "Rara memutuskan pulang naik ojol setelah kejadian tadi.\nPesanannya sudah tiba di parkiran — tapi Rara harus CEK PLAT dulu\nsebelum naik!",
+          },
+        ],
+        () => {
+          this.phase = "plat_check";
+          this._startPlatCheck();
+        },
+      );
       return;
     }
 
@@ -702,7 +720,8 @@ class Day3 extends Phaser.Scene {
 
       lbl.on("pointerdown", () => {
         _stopV2Timer();
-        GameState.addChoice(3, c.label, c.category);
+        // Fix #D3-3: Gunakan overridePts agar tidak double-counting skor
+        GameState.addChoice(3, c.label, c.category, c.points);
         if (c.onPick) c.onPick();
 
         // "Iya Om Jemput" = instant Game Over (GDD: most dangerous choice)
@@ -817,7 +836,7 @@ class Day3 extends Phaser.Scene {
             : c.category === "AMAN"
               ? CFG.SCORE.AMAN
               : CFG.SCORE.RAGU;
-        if (pts > 0) GameState.score += pts;
+        // Tidak perlu tambah skor lagi — sudah ditangani oleh GameState.addChoice() di atas
         const fb = this.add
           .text(
             W / 2,
@@ -1046,7 +1065,7 @@ class Day3 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: 'Di parkiran sekolah, seseorang tiba-tiba menghalangi jalan Rara.\nIni adalah "Si Bayangan Gelap" — orang berbahaya yang Rara sudah curigai!',
+          text: 'Di parkiran sekolah, seseorang tiba-tiba menghalangi jalan Rara.\nIni adalah "Si Bayangan Gelap" — orang yang mengirimkan pesan berbahaya ke Rara tadi!',
         },
         {
           speaker: "Si Bayangan Gelap",
@@ -1485,7 +1504,7 @@ class Day3 extends Phaser.Scene {
     this.dlg.show(
       [
         {
-          speaker: "Pak Guru",
+          speaker: "Pak Guru & Polisi",
           portrait: "polisi",
           text: '"Hei! Ada apa di sini?! Kami dengar kamu teriak!"\n\nSi Bayangan Gelap lari terbirit-birit melihat guru dan polisi datang!',
         },
@@ -1495,7 +1514,7 @@ class Day3 extends Phaser.Scene {
           text: '"Pak Guru, tadi ada orang yang mengancam saya! Namanya Si Petta!"\n\nRara memberanikan diri untuk bercerita. Ini keputusan terbaik!',
         },
         {
-          speaker: "Pak Guru",
+          speaker: "Pak Guru & Polisi",
           portrait: "polisi",
           text: '"Tenang Rara, kamu sudah sangat berani! Kamu tidak salah.\nKami akan bantu lapor ke pihak berwajib. Makasih sudah bilang ki!"',
         },
