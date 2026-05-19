@@ -749,7 +749,7 @@ class Day3 extends Phaser.Scene {
     });
 
     choices.forEach((c, i) => {
-      const by = PANEL_Y + 34 + i * 46;
+      const by = PANEL_Y + 34 + i * 42;
       const bw = W - 40;
       const bg2 = this.add.graphics().setScrollFactor(0).setDepth(80);
       bg2._isChatV2 = true;
@@ -1127,7 +1127,7 @@ class Day3 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "Rara baru saja mau naik ojol ketika seseorang tiba-tiba menghalangi jalannya!\nOrang itu... adalah \"Si Bayangan Gelap\" —\npengirim pesan-pesan berbahaya tadi yang kini muncul langsung di depan Rara!",
+          text: 'Rara baru saja mau naik ojol ketika seseorang tiba-tiba menghalangi jalannya!\nOrang itu... adalah "Si Bayangan Gelap" —\npengirim pesan-pesan berbahaya tadi yang kini muncul langsung di depan Rara!',
         },
         {
           speaker: "Si Bayangan Gelap",
