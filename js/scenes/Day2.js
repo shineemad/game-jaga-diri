@@ -2374,16 +2374,16 @@ class Day2 extends Phaser.Scene {
 
     const content = [
       {
-        h: "🛡 Tubuhku adalah Milikku",
-        b: "Area privat tidak boleh disentuh siapapun tanpa izin.\nDokter boleh memeriksa dengan izin orang tua dan kamu hadir.",
+        h: "🛡 Tubuhku = Milikku!",
+        b: "Bagian privat tubuhmu NGGAK BOLEH disentuh siapapun\ntanpa izinmu — kecuali dokter dan ada ortu yang mendampingi.",
       },
       {
-        h: "📱 Aman di Dunia Digital",
-        b: "• Jangan bagikan foto dirimu ke orang asing\n• Blokir dan screenshot pesan mencurigakan\n• Ceritakan ke orang tua/guru jika ada pesan tidak nyaman",
+        h: "📱 Aman di Dunia Online:",
+        b: "• Jangan kirim foto dirimu ke orang yang nggak dikenal!\n• Chat nggak nyaman? Langsung BLOKIR + screenshot-nya\n• Ceritain ke ortu atau guru — jangan pendam sendiri!",
       },
       {
-        h: "✊ Kekuatan Rara",
-        b: '"KATAKAN TIDAK" adalah hakmu yang tidak bisa\ndiambil oleh siapapun!',
+        h: "✊ Ingat Ini Selalu!",
+        b: '"Tidak" adalah kata yang KUAT dan itu HAK kamu!\nNggak ada yang boleh maksa kamu melakukan\nhal yang bikin kamu nggak nyaman.',
       },
     ];
     let y = 72;
@@ -2414,7 +2414,7 @@ class Day2 extends Phaser.Scene {
       .text(
         W / 2,
         H - 55,
-        "📞 Hotline Perlindungan Anak: 129 | KPAI: 021-31901556",
+        "📞 Butuh bantuan? Hotline Anak: 129 | KPAI: 021-31901556",
         {
           fontFamily: "Arial",
           fontSize: "12px",

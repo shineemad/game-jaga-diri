@@ -815,7 +815,8 @@ class Day1 extends Phaser.Scene {
           text: "Gimana Rara harus merespons orang ini?",
           choices: [
             {
-              label: '"NGGAK MAU! Aku nggak kenal Bapak!" → Lari ke tempat rame!',
+              label:
+                '"NGGAK MAU! Aku nggak kenal Bapak!" → Lari ke tempat rame!',
               category: "AMAN",
               onPick: () => {
                 GameState.score += 100;
@@ -884,7 +885,8 @@ class Day1 extends Phaser.Scene {
           text: "Apa yang Rara lakuin sekarang?",
           choices: [
             {
-              label: '"Nggak mau! Makasih, aku jalan sendiri aja!" (pergi cepat)',
+              label:
+                '"Nggak mau! Makasih, aku jalan sendiri aja!" (pergi cepat)',
               category: "AMAN",
               onPick: () => {
                 GameState.score += 100;
@@ -1877,16 +1879,16 @@ class Day1 extends Phaser.Scene {
 
     const tips = [
       {
-        h: "� ORANG ASING KASIH HADIAH = RED FLAG!",
-        b: "Permen, snack, mainan, atau tumpangan GRATIS dari orang yang\nbaru dikenal adalah tanda bahaya. Jangan terima, langsung pergi!",
+        h: "🚩 Orang Asing Kasih Hadiah = BAHAYA!",
+        b: "Permen, snack, mainan, atau tumpangan gratis dari orang\nyang baru kamu kenal? Itu tanda bahaya — tolak dan langsung pergi!",
       },
       {
-        h: "✅ Yang Harus Dilakukan:",
-        b: "• Tolak dengan tegas — kamu BOLEH berkata TIDAK!\n• Teriak KERAS dan lari ke tempat ramai\n• Ceritakan ke orang tua, guru, atau orang dewasa terpercaya",
+        h: "✅ Yang Harus Kamu Lakuin:",
+        b: "• Bilang TIDAK dengan tegas — itu HAK kamu!\n• Teriak keras dan lari ke tempat yang rame\n• Ceritain ke ortu, guru, atau orang dewasa yang kamu percaya",
       },
       {
-        h: '🛡 "Tidak" adalah Hakmu!',
-        b: "Kamu berhak menolak siapapun yang membuatmu tidak nyaman —\ntermasuk orang dewasa atau orang yang mengaku baik.",
+        h: '🛡 Bilang "Tidak" itu BOLEH!',
+        b: "Kamu BERHAK menolak siapapun yang bikin kamu nggak nyaman —\ntermasuk orang dewasa sekalipun!",
       },
     ];
     let y = 80;

@@ -1132,7 +1132,7 @@ class Day3 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: 'TUNGGU! Rara mau naik ojol...\ntapi seseorang tiba-tiba menghadang jalannya! 😱\nItu dia — si pengirim pesan tadi — muncul langsung di depan Rara!!',
+          text: "TUNGGU! Rara mau naik ojol...\ntapi seseorang tiba-tiba menghadang jalannya! 😱\nItu dia — si pengirim pesan tadi — muncul langsung di depan Rara!!",
         },
         {
           speaker: "Si Bayangan Gelap",
@@ -1310,7 +1310,8 @@ class Day3 extends Phaser.Scene {
         ],
       },
       {
-        bossText: '"Udah deh, ikut aja. Aku janji nggak bakal nyakitin kamu kok~"',
+        bossText:
+          '"Udah deh, ikut aja. Aku janji nggak bakal nyakitin kamu kok~"',
         choices: [
           {
             label: '"JANGAN SENTUH AKU!! TOLONG!!! 🆘" (Voice MAX)',
@@ -1323,7 +1324,11 @@ class Day3 extends Phaser.Scene {
             category: "BAHAYA",
             dmg: 0,
           },
-          { label: '"A-aku mau kabur..." (tapi nggak tau caranya)', category: "RAGU", dmg: 0.1 },
+          {
+            label: '"A-aku mau kabur..." (tapi nggak tau caranya)',
+            category: "RAGU",
+            dmg: 0.1,
+          },
         ],
       },
       // GDD Stage E: Ronde Final — Panic Button
@@ -1455,33 +1460,90 @@ class Day3 extends Phaser.Scene {
           AudioManager.sfxBossGroan();
           this.cameras.main.shake(180, 0.007);
           const hitTxt = this.add
-            .text(W * 0.68, H * 0.28, `💥 -${Math.round((c.dmg || 0) * 100)}% Mental!`, {
-              fontFamily: "Arial", fontSize: "16px", color: "#FFD700",
-              fontStyle: "bold", stroke: "#000", strokeThickness: 3,
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
-          this.tweens.add({ targets: hitTxt, y: H * 0.12, alpha: 0, duration: 1000, onComplete: () => hitTxt.destroy() });
+            .text(
+              W * 0.68,
+              H * 0.28,
+              `💥 -${Math.round((c.dmg || 0) * 100)}% Mental!`,
+              {
+                fontFamily: "Arial",
+                fontSize: "16px",
+                color: "#FFD700",
+                fontStyle: "bold",
+                stroke: "#000",
+                strokeThickness: 3,
+              },
+            )
+            .setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(200);
+          this.tweens.add({
+            targets: hitTxt,
+            y: H * 0.12,
+            alpha: 0,
+            duration: 1000,
+            onComplete: () => hitTxt.destroy(),
+          });
           const reactTxt = this.add
             .text(W * 0.2, H * 0.42, "💪 BERANI!", {
-              fontFamily: "Arial", fontSize: "14px", color: "#44FF88",
-              fontStyle: "bold", stroke: "#000", strokeThickness: 2,
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
-          this.tweens.add({ targets: reactTxt, y: H * 0.32, alpha: 0, duration: 900, delay: 100, onComplete: () => reactTxt.destroy() });
+              fontFamily: "Arial",
+              fontSize: "14px",
+              color: "#44FF88",
+              fontStyle: "bold",
+              stroke: "#000",
+              strokeThickness: 2,
+            })
+            .setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(200);
+          this.tweens.add({
+            targets: reactTxt,
+            y: H * 0.32,
+            alpha: 0,
+            duration: 900,
+            delay: 100,
+            onComplete: () => reactTxt.destroy(),
+          });
         } else if (c.category === "RAGU") {
           AudioManager.sfxNeutral();
           const raguTxt = this.add
             .text(W * 0.5, H * 0.35, "😟 Kurang kuat...", {
-              fontFamily: "Arial", fontSize: "14px", color: "#FFD700",
-              stroke: "#000", strokeThickness: 2,
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
-          this.tweens.add({ targets: raguTxt, y: H * 0.25, alpha: 0, duration: 900, onComplete: () => raguTxt.destroy() });
+              fontFamily: "Arial",
+              fontSize: "14px",
+              color: "#FFD700",
+              stroke: "#000",
+              strokeThickness: 2,
+            })
+            .setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(200);
+          this.tweens.add({
+            targets: raguTxt,
+            y: H * 0.25,
+            alpha: 0,
+            duration: 900,
+            onComplete: () => raguTxt.destroy(),
+          });
         } else {
           AudioManager.sfxWrong();
           const badTxt = this.add
             .text(W * 0.5, H * 0.38, "😨 Bahaya! -1 ❤", {
-              fontFamily: "Arial", fontSize: "14px", color: "#FF4444",
-              fontStyle: "bold", stroke: "#000", strokeThickness: 2,
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
-          this.tweens.add({ targets: badTxt, y: H * 0.28, alpha: 0, duration: 900, onComplete: () => badTxt.destroy() });
+              fontFamily: "Arial",
+              fontSize: "14px",
+              color: "#FF4444",
+              fontStyle: "bold",
+              stroke: "#000",
+              strokeThickness: 2,
+            })
+            .setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(200);
+          this.tweens.add({
+            targets: badTxt,
+            y: H * 0.28,
+            alpha: 0,
+            duration: 900,
+            onComplete: () => badTxt.destroy(),
+          });
         }
         if (c.isPanic) {
           this._triggerPanicButton();
@@ -1668,15 +1730,15 @@ class Day3 extends Phaser.Scene {
     const content = [
       {
         h: "⚠ Apa itu Grooming?",
-        b: "Grooming = orang dewasa 'mendekati' anak secara nggak sehat\n— bisa lewat chat, sosmed, atau langsung. Ini KEJAHATAN!",
+        b: "Grooming = ada orang dewasa yang pura-pura 'baik' buat\nmendekati anak — lewat chat, sosmed, atau langsung ketemu.\nIni KEJAHATAN. Kamu boleh lapor!",
       },
       {
-        h: "🦁 Kamu BISA Melawan!",
-        b: "• Teriak KERAS kalau terancam — minta tolong!\n• Hubungi orang terdekat / tekan tombol darurat\n• Cerita ke ortu, guru, atau polisi. Jangan pendam sendiri!",
+        h: "🦁 Cara Melindungi Diri:",
+        b: "• Terasa nggak aman? TERIAK keras dan minta tolong!\n• Chat mencurigakan? Blokir + screenshot + cerita ke ortu\n• Guru dan polisi ADA untuk melindungi kamu!",
       },
       {
-        h: "📣 INGAT SELALU:",
-        b: "Kamu NGGAK PERNAH salah kalau jadi korban.\nBerani cerita = tindakan PALING KEREN yang bisa kamu lakuin!",
+        h: "📣 Yang Paling Penting:",
+        b: "Kalau kamu jadi korban, itu BUKAN salahmu!\nBerani cerita ke orang yang dipercaya\n= tindakan paling berani yang bisa kamu lakuin! 💪",
       },
     ];
     let y = 70;
