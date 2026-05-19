@@ -267,6 +267,8 @@ class Result2 extends Phaser.Scene {
       .on("pointerout", () => btnG.setAlpha(1))
       .on("pointerdown", () => {
         AudioManager.sfxClick();
+        GameState.day = 3;
+        GameState.save();
         this.cameras.main.fadeOut(400);
         this.time.delayedCall(400, () => this.scene.start("Prolog3"));
       });

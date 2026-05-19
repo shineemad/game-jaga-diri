@@ -63,4 +63,59 @@ const GameState = {
     if (pct >= 0.4) return { label: "Si Pemberani", color: "#CD7F32" };
     return { label: "Masih Perlu Belajar", color: "#FF6B6B" };
   },
+
+  // ── Simpan progress ke localStorage ────────────────────────────
+  save() {
+    try {
+      const data = {
+        lives: this.lives,
+        score: this.score,
+        day: this.day,
+        pathChoice: this.pathChoice,
+        screenshotTaken: this.screenshotTaken,
+        platChecked: this.platChecked,
+        choices: this.choices,
+        achievements: this.achievements,
+        checkpoints: { ...this.checkpoints },
+        playerName: this.playerName,
+        savedAt: Date.now(),
+      };
+      localStorage.setItem("rara_save", JSON.stringify(data));
+    } catch (e) {}
+  },
+
+  load() {
+    try {
+      const raw = localStorage.getItem("rara_save");
+      if (!raw) return false;
+      const d = JSON.parse(raw);
+      this.lives = d.lives ?? 3;
+      this.score = d.score ?? 0;
+      this.day = d.day ?? 1;
+      this.pathChoice = d.pathChoice ?? "safe";
+      this.screenshotTaken = d.screenshotTaken ?? false;
+      this.platChecked = d.platChecked ?? false;
+      this.choices = d.choices ?? [];
+      this.achievements = d.achievements ?? [];
+      this.checkpoints = d.checkpoints ?? { d1: false, d2: false, d3: false };
+      this.playerName = d.playerName ?? "Rara";
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  hasSave() {
+    try {
+      return !!localStorage.getItem("rara_save");
+    } catch (e) {
+      return false;
+    }
+  },
+
+  clearSave() {
+    try {
+      localStorage.removeItem("rara_save");
+    } catch (e) {}
+  },
 };

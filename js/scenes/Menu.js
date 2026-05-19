@@ -52,6 +52,11 @@ class Menu extends Phaser.Scene {
       });
     });
 
+    // Tombol LANJUTKAN jika ada save data
+    if (GameState.hasSave()) {
+      this._makeLanjutkanButton(W);
+    }
+
     // Versi & kredit singkat
     this.add
       .text(W - 10, H - 10, "v1.0 | Dibuat dengan Phaser 3", {
@@ -133,6 +138,95 @@ class Menu extends Phaser.Scene {
         this._showQuitConfirm();
         break;
     }
+  }
+
+  _makeLanjutkanButton(W) {
+    // Parse save data untuk info tampil
+    let saveInfo = "";
+    try {
+      const d = JSON.parse(localStorage.getItem("rara_save") || "{}");
+      if (d.day)
+        saveInfo = `Hari ${d.day}  |  Skor: ${d.score || 0}  |  ${d.playerName || "Rara"}`;
+    } catch (e) {}
+
+    const by = 368;
+    const bg = this.add.graphics().setDepth(10);
+    const drawBtn = (hover) => {
+      bg.clear();
+      bg.fillStyle(0x004422, hover ? 1.0 : 0.88);
+      bg.fillRoundedRect(W / 2 - 145, by, 290, 46, 10);
+      bg.lineStyle(2, 0x44ff88, hover ? 1.0 : 0.7);
+      bg.strokeRoundedRect(W / 2 - 145, by, 290, 46, 10);
+    };
+    drawBtn(false);
+
+    const lbl = this.add
+      .text(W / 2, by + 14, "🎮 LANJUTKAN", {
+        ...CFG.F.BUTTON,
+        color: "#44FF88",
+        fontSize: "17px",
+      })
+      .setOrigin(0.5)
+      .setDepth(11);
+
+    this.add
+      .text(W / 2, by + 32, saveInfo, {
+        fontFamily: "Arial",
+        fontSize: "10px",
+        color: "#AAFFCC",
+      })
+      .setOrigin(0.5)
+      .setDepth(11);
+
+    const zone = this.add
+      .zone(W / 2 - 145, by, 290, 46)
+      .setOrigin(0)
+      .setDepth(12)
+      .setInteractive({ useHandCursor: true });
+    zone.on("pointerover", () => {
+      drawBtn(true);
+      lbl.setColor("#FFFFFF");
+    });
+    zone.on("pointerout", () => {
+      drawBtn(false);
+      lbl.setColor("#44FF88");
+    });
+    zone.on("pointerdown", () => {
+      AudioManager.sfxClick();
+      if (!GameState.load()) return;
+      AudioManager.stopBGM();
+      this.cameras.main.fadeOut(400);
+      this.time.delayedCall(400, () => {
+        const cp = GameState.checkpoints;
+        if (GameState.day >= 3) this.scene.start(cp.d3 ? "Day3" : "Prolog3");
+        else if (GameState.day >= 2)
+          this.scene.start(cp.d2 ? "Day2" : "Prolog2");
+        else this.scene.start("Prolog1");
+      });
+    });
+
+    // Tombol hapus save (kecil di kanan)
+    const delG = this.add.graphics().setDepth(12);
+    delG.fillStyle(0x440000, 0.7);
+    delG.fillRoundedRect(W / 2 + 152, by + 6, 32, 34, 6);
+    const delLbl = this.add
+      .text(W / 2 + 168, by + 23, "🗑", {
+        fontFamily: "Arial",
+        fontSize: "14px",
+      })
+      .setOrigin(0.5)
+      .setDepth(13)
+      .setInteractive({ useHandCursor: true });
+    delLbl.on("pointerdown", () => {
+      if (confirm("Hapus data simpan?")) {
+        GameState.clearSave();
+        bg.destroy();
+        lbl.destroy();
+        zone.destroy();
+        delG.destroy();
+        delLbl.destroy();
+      }
+    });
   }
 
   _showSettings() {

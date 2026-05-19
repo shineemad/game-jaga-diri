@@ -74,6 +74,13 @@ class VoiceMeter {
     return this.smoothed >= CFG.VOICE.THRESHOLD;
   }
 
+  // Kembalikan level suara: 'normal' (hijau) | 'medium' (kuning) | 'high' (merah)
+  getLevel() {
+    if (this.smoothed >= CFG.VOICE.THRESHOLD) return "high";
+    if (this.smoothed >= 0.35) return "medium";
+    return "normal";
+  }
+
   // 0-1
   get() {
     return this.smoothed;

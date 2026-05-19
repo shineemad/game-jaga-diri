@@ -39,9 +39,9 @@ const CFG = {
     // HUD
     HP_FULL: 0xe74c3c,
     HP_EMPTY: 0x555555,
-    VOICE_LO: 0x3498db,
-    VOICE_MI: 0xf39c12,
-    VOICE_HI: 0xe74c3c,
+    VOICE_LO: 0x27ae60, // Hijau — Suara Normal → jalan biasa
+    VOICE_MI: 0xf39c12, // Kuning — Suara Sedang → ragu/lambat
+    VOICE_HI: 0xe74c3c, // Merah  — Suara KERAS → speed boost
   },
 
   // Font styles
@@ -97,7 +97,7 @@ const CFG = {
   },
 
   // Skor
-  SCORE: { AMAN: 100, RAGU: 50, BAHAYA: 0 },
+  SCORE: { AMAN: 100, RAGU: 50, BAHAYA: 0, QUIZ: 200, LAPOR: 500 },
 
   // Voice meter
   VOICE: {

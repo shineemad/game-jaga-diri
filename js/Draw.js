@@ -196,10 +196,13 @@ const DrawUtils = {
   voiceMeterBar(g, x, y, w, h, level) {
     g.fillStyle(0x333333);
     g.fillRect(x, y, w, h);
+    // 3 warna sesuai GDD: Hijau (Normal) / Kuning (Sedang) / Merah (KERAS)
     let color;
-    if (level < 0.5) color = CFG.C.VOICE_LO;
-    else if (level < CFG.VOICE.THRESHOLD) color = CFG.C.VOICE_MI;
-    else color = CFG.C.VOICE_HI;
+    if (level < 0.35)
+      color = CFG.C.VOICE_LO; // Hijau
+    else if (level < CFG.VOICE.THRESHOLD)
+      color = CFG.C.VOICE_MI; // Kuning
+    else color = CFG.C.VOICE_HI; // Merah
     g.fillStyle(color);
     g.fillRect(x, y, w * level, h);
     // Garis threshold
@@ -237,6 +240,198 @@ const DrawUtils = {
   // Alias lama agar kompatibel
   sulselBorder(...args) {
     return DrawUtils.drawBorder(...args);
+  },
+
+  // ── NAME TAG (label referensi Unity di atas karakter) ───────────────────
+  nameTag(g, x, y, name, color = 0xffd700) {
+    const w = name.length * 7 + 14;
+    g.fillStyle(0x000000, 0.7);
+    g.fillRoundedRect(x - w / 2, y - 4, w, 15, 4);
+    g.lineStyle(1, color, 0.9);
+    g.strokeRoundedRect(x - w / 2, y - 4, w, 15, 4);
+    // Teks ditampilkan via add.text di scene — nameTag hanya latar
+  },
+
+  // ── PAMAN BAIK (encounter 1: tawaran permen) ────────────────────────────
+  pamanBaik(g, x, y) {
+    const t = Date.now();
+    const pulse = 0.08 + 0.04 * Math.sin(t / 400);
+
+    // Aura kuning-oranye (tampak "ramah" tapi mencurigakan)
+    g.fillStyle(0xff8800, pulse);
+    g.fillCircle(x, y - 5, 44);
+
+    // Tubuh — coklat gelap (lebih terang dari shadowNpc)
+    g.fillStyle(0x4a2800);
+    g.fillRect(x - 12, y - 5, 24, 26); // badan
+    g.fillRect(x - 18, y - 3, 7, 18); // lengan kiri
+    g.fillRect(x + 11, y - 3, 7, 18); // lengan kanan
+    g.fillRect(x - 9, y + 21, 7, 20); // kaki kiri
+    g.fillRect(x + 2, y + 21, 7, 20); // kaki kanan
+    g.fillStyle(0x5c3210);
+    g.fillCircle(x, y - 16, 14); // kepala
+
+    // Topi fedora / topi pak tua
+    g.fillStyle(0x3a1e00);
+    g.fillRect(x - 16, y - 28, 32, 6); // pinggiran topi
+    g.fillRect(x - 10, y - 40, 20, 14); // badan topi
+
+    // Mata berkilau (ramah tapi tidak dapat dipercaya)
+    g.fillStyle(0xffaa00);
+    g.fillCircle(x - 5, y - 18, 2.5);
+    g.fillCircle(x + 5, y - 18, 2.5);
+
+    // Permen di tangan (3 lingkaran warna-warni)
+    g.fillStyle(0xff4444);
+    g.fillCircle(x + 20, y + 2, 4);
+    g.fillStyle(0x44ff44);
+    g.fillCircle(x + 26, y - 2, 3.5);
+    g.fillStyle(0x4444ff);
+    g.fillCircle(x + 23, y + 7, 3);
+    // Batang permen
+    g.lineStyle(1.5, 0xffffff, 0.8);
+    g.lineBetween(x + 18, y + 4, x + 20, y + 12);
+
+    // Tanda seru kuning (peringatan untuk pemain)
+    g.fillStyle(0xffdd00, 0.7 + 0.3 * Math.sin(t / 200));
+    g.fillTriangle(x, y - 52, x - 8, y - 38, x + 8, y - 38);
+    g.fillStyle(0x000000);
+    g.fillRect(x - 1.5, y - 50, 3, 7);
+    g.fillRect(x - 1.5, y - 41, 3, 3);
+  },
+
+  // ── MOTOR NPC (encounter 2: motor nyasar, tawaran tumpangan) ────────────
+  motorNpc(g, x, y) {
+    const t = Date.now();
+
+    // Motor — badan utama
+    g.fillStyle(0x444444);
+    g.fillRect(x - 28, y + 8, 56, 18); // rangka
+    g.fillStyle(0x666666);
+    g.fillRect(x - 14, y - 2, 28, 12); // bodi atas / tangki
+    // Roda
+    g.fillStyle(0x222222);
+    g.fillCircle(x - 22, y + 26, 11);
+    g.fillCircle(x + 22, y + 26, 11);
+    g.fillStyle(0x888888);
+    g.fillCircle(x - 22, y + 26, 5);
+    g.fillCircle(x + 22, y + 26, 5);
+    // Knalpot
+    g.fillStyle(0x888888);
+    g.fillRect(x + 22, y + 14, 18, 4);
+    // Lampu
+    g.fillStyle(0xffff88);
+    g.fillRect(x - 30, y + 4, 6, 5);
+
+    // Pengendara
+    g.fillStyle(0x2c4a1a); // jaket hijau gelap
+    g.fillRect(x - 10, y - 20, 20, 22);
+    g.fillStyle(0x1a3310);
+    g.fillCircle(x, y - 22, 13); // helm
+
+    // Tangan menunjuk (tanya arah)
+    g.fillStyle(0xc8a07a);
+    g.fillRect(x + 10, y - 14, 22, 5);
+    g.fillCircle(x + 32, y - 12, 5);
+
+    // Aura merah tipis (bahaya tersamar)
+    g.fillStyle(0xff2200, 0.06 + 0.04 * Math.sin(t / 350));
+    g.fillCircle(x, y, 48);
+  },
+
+  // ── GANG BLOCKER (encounter 3 / jalur bahaya) ───────────────────────────
+  gangGroup(g, x, y) {
+    const t = Date.now();
+    // 3 figur gelap bertumpang tindih
+    const offsets = [-22, 0, 22];
+    offsets.forEach((ox, i) => {
+      const px = x + ox;
+      const scale = i === 1 ? 1.15 : 0.9; // figur tengah sedikit lebih besar
+      g.fillStyle(0x1a0000, 0.95);
+      g.fillRect(px - 9 * scale, y - 5, 18 * scale, 26 * scale);
+      g.fillRect(px - 15 * scale, y - 3, 7 * scale, 16 * scale);
+      g.fillRect(px + 8 * scale, y - 3, 7 * scale, 16 * scale);
+      g.fillRect(px - 8, y + 21 * scale, 7, 20);
+      g.fillRect(px + 1, y + 21 * scale, 7, 20);
+      g.fillStyle(0x110000, 0.95);
+      g.fillCircle(px, y - 18 * scale, 14 * scale);
+      // Mata merah semua
+      g.fillStyle(0xff0000, 0.8);
+      g.fillCircle(px - 4 * scale, y - 20 * scale, 2.5);
+      g.fillCircle(px + 4 * scale, y - 20 * scale, 2.5);
+    });
+    // Aura merah kuat
+    g.fillStyle(0xff0000, 0.12 + 0.08 * Math.sin(t / 180));
+    g.fillCircle(x, y, 65);
+    // Tangan bentang menghadang
+    g.fillStyle(0x1a0000);
+    g.fillRect(x - 60, y + 5, 30, 6);
+    g.fillRect(x + 30, y + 5, 30, 6);
+  },
+
+  // ── ANGKOT (minivan khas Indonesia) ─────────────────────────────────────
+  angkot(g, x, y, color = 0x1a8a2a) {
+    // Badan utama
+    g.fillStyle(color);
+    g.fillRect(x - 55, y - 28, 110, 52);
+    // Atap melengkung
+    g.fillStyle(color);
+    g.fillEllipse(x, y - 28, 100, 20);
+    // Strip putih horizontal
+    g.fillStyle(0xffffff, 0.5);
+    g.fillRect(x - 55, y - 10, 110, 5);
+    // Kaca depan
+    g.fillStyle(0x88ccff, 0.7);
+    g.fillRect(x + 28, y - 24, 22, 18);
+    // Kaca samping
+    g.fillStyle(0x88ccff, 0.5);
+    g.fillRect(x - 44, y - 22, 34, 16);
+    g.fillRect(x - 4, y - 22, 26, 16);
+    // Pintu samping
+    g.lineStyle(1.5, 0x007700, 0.8);
+    g.lineBetween(x - 12, y - 22, x - 12, y + 24);
+    // Roda
+    g.fillStyle(0x222222);
+    g.fillCircle(x - 32, y + 26, 13);
+    g.fillCircle(x + 30, y + 26, 13);
+    g.fillStyle(0x888888);
+    g.fillCircle(x - 32, y + 26, 6);
+    g.fillCircle(x + 30, y + 26, 6);
+    // Lampu depan
+    g.fillStyle(0xffff88);
+    g.fillRect(x + 50, y - 16, 8, 8);
+    // Label ANGKOT di badan
+    g.fillStyle(0xffffff, 0.6);
+    g.fillRect(x - 52, y - 2, 60, 14);
+    g.lineStyle(1, 0x007700);
+    g.strokeRect(x - 52, y - 2, 60, 14);
+  },
+
+  // ── HALTE BUS (referensi tempat nunggu angkot) ───────────────────────────
+  halte(g, x, y) {
+    // Atap
+    g.fillStyle(0x1a5c8a);
+    g.fillRect(x - 55, y - 58, 110, 10);
+    g.fillRect(x - 60, y - 58, 8, 10); // tiang kiri
+    g.fillRect(x + 52, y - 58, 8, 10); // tiang kanan
+    // Dinding kaca samping
+    g.fillStyle(0x88ccff, 0.3);
+    g.fillRect(x - 55, y - 48, 110, 48);
+    g.lineStyle(1.5, 0x1a5c8a, 0.8);
+    g.strokeRect(x - 55, y - 48, 110, 48);
+    // Bangku
+    g.fillStyle(0x3a3a3a);
+    g.fillRect(x - 40, y - 14, 80, 8);
+    g.fillRect(x - 38, y - 6, 8, 8);
+    g.fillRect(x + 30, y - 6, 8, 8);
+    // Tiang kiri-kanan bawah
+    g.fillStyle(0x1a5c8a);
+    g.fillRect(x - 54, y - 48, 5, 48);
+    g.fillRect(x + 50, y - 48, 5, 48);
+    // Label
+    g.fillStyle(0x1a5c8a);
+    g.fillRect(x - 30, y - 72, 60, 16);
+    g.fillStyle(0xffffff);
   },
 
   // ── BACKGROUND SCENE ────────────────────────────────────────────────────

@@ -22,7 +22,7 @@ class Day1 extends Phaser.Scene {
     //         walking2 | encounter2 | walking3 | encounter3 | educard | complete
     this.phase = "intro";
     this.dialogActive = false;
-    this.encounterDone = { e1: false, e2: false, e3: false };
+    this.encounterDone = { e1: false, path: false, e2: false, e3: false };
     this.voiceHeld = 0;
     this.npcApproach = 0; // accumulate approach timer
     this.shoutCooldown = 0;
@@ -257,22 +257,30 @@ class Day1 extends Phaser.Scene {
         angry: false,
         approachTimer: 0,
         approached: false,
+        type: "pamanBaik",
+        label: "Paman Baik",
       },
       giftMan: {
         x: 1550,
         y: 307,
         active: true,
         angry: false,
+        noApproach: true, // dialog-only encounter, bukan approach-based
         approachTimer: 0,
         approached: false,
+        type: "motorNpc",
+        label: "Motor Nyasar",
       },
       runner: {
         x: 2100,
         y: 307,
-        active: true,
+        active: false, // diaktifkan hanya saat jalur berbahaya dipilih
         angry: true,
+        noApproach: true, // dialog encounter, bukan approach-based
         approachTimer: 0,
         approached: false,
+        type: "gangGroup",
+        label: "Gang Penghadang",
       },
     };
   }
@@ -427,6 +435,19 @@ class Day1 extends Phaser.Scene {
     // Score
     this.hudScore.setText(`Skor: ${GameState.score}`);
 
+    // Indikator jalur berbahaya — strip merah di tepi layar
+    if (
+      GameState.pathChoice === "dangerous" &&
+      ["walking2", "walking3", "encounter2", "encounter3"].includes(this.phase)
+    ) {
+      const pulse = 0.15 + 0.08 * Math.sin(this.time.now / 400);
+      this.hudGfx.fillStyle(0xff0000, pulse);
+      this.hudGfx.fillRect(0, 0, 6, CFG.HEIGHT);
+      this.hudGfx.fillRect(CFG.WIDTH - 6, 0, 6, CFG.HEIGHT);
+      this.hudGfx.fillRect(0, 0, CFG.WIDTH, 4);
+      this.hudGfx.fillRect(0, CFG.HEIGHT - 4, CFG.WIDTH, 4);
+    }
+
     // Voice meter
     this.hudVoiceGfx.clear();
     DrawUtils.voiceMeterBar(
@@ -438,15 +459,22 @@ class Day1 extends Phaser.Scene {
       voiceMeter.get(),
     );
 
-    // Phase hint
+    // Phase hint — berbeda berdasarkan jalur yang dipilih
+    const isDangerRoute = GameState.pathChoice === "dangerous";
     const hints = {
       tutorial: "⬅⬆ Gerak | TERIAK untuk hancurkan rintangan",
       walking: "⬅⬆ Gerak | 📢 TERIAK untuk usir NPC",
-      walking2: "⬅⬆ Gerak | ⚠ Hati-hati di gang!",
-      walking3: "⬅⬆ Gerak | Hampir sampai sekolah!",
+      walking2: isDangerRoute
+        ? "🌑 GANG SEPI — BAHAYA! Teriak sekeras-kerasnya!"
+        : "🏙 JALAN RAMAI — tetap waspada, jangan sendirian!",
+      walking3: isDangerRoute
+        ? "⚠ Hampir sampai… jangan berhenti bersuara!"
+        : "✅ Jalur aman — hampir sampai sekolah!",
       encounter1: "⚠ Ada orang asing! Pilih respons!",
       path_choice: "Pilih jalur perjalananmu!",
-      encounter2: "⚠ Ada yang menawarkan sesuatu!",
+      encounter2: isDangerRoute
+        ? "🚨 Pengendara mencurigakan! TERIAK atau HINDARI!"
+        : "⚠ Ada yang menawarkan sesuatu!",
       encounter3: "🏃 LARI atau TERIAK!",
       educard: "Baca kartu edukasi...",
     };
@@ -577,36 +605,76 @@ class Day1 extends Phaser.Scene {
   _checkEncounters(delta) {
     const rx = this.raraBody.x;
 
-    // ── ENCOUNTER 1: Pria Asing (Orang Tidak Dikenal) ──────────────
+    // ── ENCOUNTER 1: PAMAN BAIK (tawaran permen) ─────────────────
     if (!this.encounterDone.e1 && rx > 820 && this.phase === "walking") {
       this.encounterDone.e1 = true;
       this.phase = "encounter1";
       this.raraBody.setVelocityX(0);
       this.dlg.show(this._dialogs.stranger1(), () => {
-        this.phase = "path_choice";
-        this._showPathChoice();
+        // Kembali berjalan — path_choice dipicu saat mencapai x=1100
+        this.phase = "walking";
       });
     }
 
-    // ── ENCOUNTER 2: Si Pemberi Permen ────────────────────────────
-    if (!this.encounterDone.e2 && rx > 1480 && this.phase === "walking2") {
+    // ── PATH CHOICE: Persimpangan Gang Sepi di x=1100 ─────────────
+    if (!this.encounterDone.path && rx > 1100 && this.phase === "walking") {
+      this.encounterDone.path = true;
+      this.phase = "path_choice";
+      this.raraBody.setVelocityX(0);
+      this._showPathChoice();
+    }
+
+    // ── ENCOUNTER 2: MOTOR NYASAR (tawaran tumpangan) ─────────────
+    // Gang sepi: dialog lebih awal (NPC sudah menghadang di gang)
+    // Jalan ramai: dialog di posisi normal setelah persimpangan
+    const e2Trigger = GameState.pathChoice === "dangerous" ? 1280 : 1480;
+    if (!this.encounterDone.e2 && rx > e2Trigger && this.phase === "walking2") {
       this.encounterDone.e2 = true;
       this.phase = "encounter2";
       this.raraBody.setVelocityX(0);
-      this.dlg.show(this._dialogs.giftMan(), () => {
+      // Dialog berbeda berdasarkan jalur: gang sepi lebih mengancam
+      const e2Dialog =
+        GameState.pathChoice === "dangerous"
+          ? this._dialogs.giftManDanger()
+          : this._dialogs.giftMan();
+      this._gangAbducted = false; // reset flag penculikan
+      this.dlg.show(e2Dialog, () => {
+        // NPC Motor Nyasar pergi setelah encounter
+        this.npcs.giftMan.active = false;
+        if (this._gangAbducted) {
+          // Pilihan BAHAYA di gang sepi = game over (penculikan)
+          this._triggerGameOver();
+          return;
+        }
         this.phase = "walking3";
       });
     }
 
-    // ── ENCOUNTER 3: NPC Menghadang Rara ──────────────────────────
-    if (!this.encounterDone.e3 && rx > 2050 && this.phase === "walking3") {
+    // ── ENCOUNTER 3: GANG BLOCKER / REWARD SEKOLAH ───────────────────
+    // Gang sepi: blocker muncul di x=2050 (di dalam gang)
+    // Jalan ramai: reward muncul di x=2700 (sampai di depan sekolah)
+    const e3Trigger = GameState.pathChoice === "dangerous" ? 2050 : 2700;
+    if (!this.encounterDone.e3 && rx > e3Trigger && this.phase === "walking3") {
       this.encounterDone.e3 = true;
-      this.phase = "encounter3";
-      this.raraBody.setVelocityX(0);
-      this.dlg.show(this._dialogs.blocker(), () => {
+      if (GameState.pathChoice === "dangerous") {
+        // Jalur berbahaya: Rara ketemu blocker
+        this.phase = "encounter3";
+        this.raraBody.setVelocityX(0);
+        this._blockAbducted = false; // reset flag
+        this.dlg.show(this._dialogs.blocker(), () => {
+          if (this._blockAbducted) {
+            this._triggerGameOver();
+            return;
+          }
+          this.phase = "educard";
+          this._showEduCard();
+        });
+      } else {
+        // Jalur aman: langsung ke educard, tampilkan pujian
         this.phase = "educard";
-        this._showEduCard();
-      });
+        this.raraBody.setVelocityX(0);
+        this._showSafeRouteReward();
+      }
     }
 
     // ── NPC APPROACH: kurangi nyawa jika diam terlalu lama ─────────
@@ -622,9 +690,11 @@ class Day1 extends Phaser.Scene {
     Object.entries(this.npcs).forEach(([key, npc]) => {
       if (!npc.active || npc.approached) return;
       const dist = npc.x - rx;
+      if (npc.noApproach) return; // dialog-only NPC, skip approach
       if (dist < 200 && dist > 0) {
-        // NPC mendekat
-        npc.x -= ((npc.angry ? 60 : 35) * delta) / 1000;
+        // NPC mendekat — gang sepi: lebih cepat & agresif
+        const pathMult = GameState.pathChoice === "dangerous" ? 1.6 : 0.8;
+        npc.x -= ((npc.angry ? 60 : 35) * pathMult * delta) / 1000;
         npc.approachTimer += delta;
 
         if (voiceMeter.isShout()) {
@@ -685,16 +755,17 @@ class Day1 extends Phaser.Scene {
   // DIALOG SCRIPTS
   get _dialogs() {
     return {
+      // GDD Encounter 1: PAMAN BAIK — "Mau permen? Ikut om ke warung bentar ya!"
       stranger1: () => [
         {
-          speaker: "Pria Asing",
+          speaker: "Paman Baik",
           portrait: "shadow",
-          text: '"Hei dek, mau ke mana? Naik motorku saja, kuantar ke sekolah!"',
+          text: '"Dek, mau permen? Enak lho, ikut om ke warung bentar saja ya, dekat kok!"',
         },
         {
           speaker: "Rara",
           portrait: "rara",
-          text: "Seorang pria tidak dikenal menghampiri Rara dengan motor. Apa yang harus Rara lakukan?",
+          text: "Seorang pria tidak dikenal menawarkan permen dan mengajak Rara pergi. Ini tanda bahaya!",
         },
         {
           speaker: "— PILIH RESPONS —",
@@ -702,19 +773,22 @@ class Day1 extends Phaser.Scene {
           text: "Bagaimana Rara seharusnya merespons?",
           choices: [
             {
-              label: '"Tidak mau, Pak! Saya jalan sendiri saja!"',
+              label:
+                '"Tidak mau! Saya tidak kenal Bapak!" (lari ke tempat ramai)',
               category: "AMAN",
               onPick: () => {
-                GameState.pathChoice = "safe";
+                GameState.score += 100;
               },
             },
             {
-              label: '"Terima kasih... tapi saya tidak kenal Bapak."',
+              label: '"Makasih, tapi saya sudah telat sekolah!"',
               category: "RAGU",
-              onPick: () => {},
+              onPick: () => {
+                GameState.score += 50;
+              },
             },
             {
-              label: '"Oke Pak, terima kasih!"',
+              label: '"Oke Pak, mau permen apa?"',
               category: "BAHAYA",
               onPick: () => {},
             },
@@ -723,34 +797,103 @@ class Day1 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "✓ Jangan pernah naik kendaraan orang tidak dikenal!\nBersuara keras dan pergi ke tempat ramai.",
+          text: "🚩 ORANG ASING KASIH HADIAH = RED FLAG!\nJangan pernah ikut atau terima apapun dari orang tidak dikenal.",
         },
       ],
+      // GDD Encounter 2: MOTOR NYASAR — "Mbak, sekolahnya yang mana ya?"
       giftMan: () => [
         {
-          speaker: "Pria Asing",
+          speaker: "Pria Motor",
           portrait: "shadow",
-          text: '"Dek, ini ada snack enak. Gratis, makan saja!"',
+          text: '"Mbak, maaf, sekolahnya yang mana ya? Kebetulan searah, naik aja gratis kuantar!"',
         },
         {
           speaker: "Rara",
           portrait: "rara",
-          text: "Seorang pria menawarkan makanan. Ini tanda bahaya!",
+          text: "Seorang pria di motor bertanya arah lalu menawarkan tumpangan. Hati-hati!",
         },
         {
           speaker: "— PILIH RESPONS —",
           portrait: "rara",
           text: "Apa yang Rara lakukan?",
           choices: [
-            { label: '"Tidak mau! Saya tidak kenal Bapak!"', category: "AMAN" },
-            { label: '"Nanti saja, saya buru-buru."', category: "RAGU" },
-            { label: "Menerima makanan itu.", category: "BAHAYA" },
+            {
+              label: '"Tidak mau naik! Saya jalan sendiri saja, Pak!"',
+              category: "AMAN",
+              onPick: () => {
+                GameState.score += 100;
+              },
+            },
+            {
+              label: '"Makasih, tapi saya sudah mau sampai kok."',
+              category: "RAGU",
+              onPick: () => {
+                GameState.score += 50;
+              },
+            },
+            {
+              label: '"Wah, searah? Oke deh naik saja!"',
+              category: "BAHAYA",
+              onPick: () => {},
+            },
           ],
         },
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "🚩 Jangan terima makanan, minuman, atau hadiah\ndari orang yang tidak kamu kenal!",
+          text: "⚠ Jangan naik kendaraan orang yang tidak dikenal!\nTolak dengan tegas dan pergi ke tempat ramai.",
+        },
+      ],
+      // Encounter 2 VERSI GANG — motor nyasar lebih agresif & mengancam
+      giftManDanger: () => [
+        {
+          speaker: "Pria Motor",
+          portrait: "shadow_angry",
+          text: '"Hei kamu! Sendirian di sini? Naik sini, cepat! Biar aku antar ke mana pun kamu mau!"',
+        },
+        {
+          speaker: "Rara (dalam hati)",
+          portrait: "rara",
+          text: "Di gang sepi ini, Rara merasa sangat tidak aman. Pria di motor itu terasa mengancam. Harus bertindak cepat!",
+        },
+        {
+          speaker: "Pria Motor",
+          portrait: "shadow_angry",
+          text: '"Kenapa diam? Sini, aku tidak gigit kok. Ini gang berbahaya buat anak kecil sendirian!"',
+        },
+        {
+          speaker: "— PILIH TINDAKAN CEPAT! —",
+          portrait: "rara",
+          text: "Rara HARUS bertindak sekarang! Apa yang dilakukan?",
+          choices: [
+            {
+              label: "📢 TERIAK SEKERAS-KERASNYA & LARI ke jalan utama!",
+              category: "AMAN",
+              onPick: () => {
+                GameState.score += 100;
+              },
+            },
+            {
+              label: '"E-eh… nggak mau, Pak. Saya sendiri aja…"',
+              category: "RAGU",
+              onPick: () => {
+                GameState.score += 50;
+              },
+            },
+            {
+              label: '"Iya deh… makasih Pak."',
+              category: "BAHAYA",
+              // Game Over: Rara naik dengan orang asing di gang sepi = penculikan
+              onPick: () => {
+                this._gangAbducted = true;
+              },
+            },
+          ],
+        },
+        {
+          speaker: "Narasi",
+          portrait: "rara",
+          text: "🚨 Gang sepi = bahaya! Jika ada yang memaksa, TERIAK sekeras mungkin!\nLari ke keramaian dan cari orang dewasa yang bisa dipercaya.",
         },
       ],
       blocker: () => [
@@ -772,9 +915,27 @@ class Day1 extends Phaser.Scene {
             {
               label: "📢 TERIAK KERAS + LARI ke tempat ramai!",
               category: "AMAN",
+              onPick: () => {
+                GameState.score += 100;
+              },
             },
-            { label: "Diam dan berdiri di sana.", category: "RAGU" },
-            { label: "Menurut dan mengikuti orang itu.", category: "BAHAYA" },
+            {
+              label: "Diam dan berdiri di sana.",
+              category: "RAGU",
+              // Diam di depan orang mengancam = berbahaya, kena penalti nyawa
+              onPick: () => {
+                GameState.score += 30;
+                GameState.loseLife();
+                if (!GameState.isAlive()) this._blockAbducted = true;
+              },
+            },
+            {
+              label: "Menurut dan mengikuti orang itu.",
+              category: "BAHAYA",
+              onPick: () => {
+                this._blockAbducted = true;
+              },
+            },
           ],
         },
         {
@@ -792,16 +953,83 @@ class Day1 extends Phaser.Scene {
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
     const overlay = this.add.graphics().setScrollFactor(0).setDepth(150);
-    overlay.fillStyle(0x000000, 0.8);
+    overlay.fillStyle(0x000000, 0.85);
     overlay.fillRect(0, 0, W, H);
 
     const panG = this.add.graphics().setScrollFactor(0).setDepth(151);
     panG.fillStyle(CFG.C.PANEL, 0.95);
-    panG.fillRoundedRect(W / 2 - 200, 80, 400, 280, 14);
-    DrawUtils.sulselBorder(panG, W / 2 - 200, 80, 400, 280, 0.9);
+    panG.fillRoundedRect(W / 2 - 220, 28, 440, 390, 14);
+    DrawUtils.sulselBorder(panG, W / 2 - 220, 28, 440, 390, 0.9);
+
+    // ── Visual Y-Fork jalan ────────────────────────────────────────
+    const forkG = this.add.graphics().setScrollFactor(0).setDepth(152);
+    const fx = W / 2,
+      fy = 80;
+    // Jalan masuk (dari bawah ke atas)
+    forkG.fillStyle(0x777777);
+    forkG.fillRect(fx - 16, fy, 32, 60); // trotoar
+    forkG.fillStyle(0x555555);
+    forkG.fillRect(fx - 12, fy + 4, 24, 52); // aspal
+
+    // Cabang kiri (AMAN) — warna hijau
+    forkG.fillStyle(0x558855);
+    forkG.fillRect(fx - 120, fy - 18, 32, 24);
+    forkG.fillRect(fx - 115, fy - 38, 22, 20);
+    forkG.fillRect(fx - 108, fy - 52, 16, 16);
+    // Garis diagonal kiri
+    forkG.lineStyle(3, 0x33aa55, 0.8);
+    forkG.lineBetween(fx - 12, fy + 4, fx - 90, fy - 44);
+    // Label kiri
+    forkG.fillStyle(0x003311, 0.85);
+    forkG.fillRoundedRect(fx - 190, fy - 64, 100, 22, 5);
+    forkG.lineStyle(1.5, 0x44ff88);
+    forkG.strokeRoundedRect(fx - 190, fy - 64, 100, 22, 5);
+
+    // Cabang kanan (BAHAYA) — warna merah gelap
+    forkG.fillStyle(0x664444);
+    forkG.fillRect(fx + 88, fy - 18, 32, 24);
+    forkG.fillRect(fx + 93, fy - 38, 22, 20);
+    forkG.fillRect(fx + 92, fy - 52, 16, 16);
+    // Garis diagonal kanan
+    forkG.lineStyle(3, 0xff4444, 0.8);
+    forkG.lineBetween(fx + 12, fy + 4, fx + 90, fy - 44);
+    // Label kanan
+    forkG.fillStyle(0x330000, 0.85);
+    forkG.fillRoundedRect(fx + 90, fy - 64, 100, 22, 5);
+    forkG.lineStyle(1.5, 0xff4444);
+    forkG.strokeRoundedRect(fx + 90, fy - 64, 100, 22, 5);
+
+    // Teks label fork
+    this.add
+      .text(fx - 140, fy - 56, "🏙 Jalan Ramai", {
+        fontFamily: "Arial",
+        fontSize: "11px",
+        color: "#44FF88",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(153);
+    this.add
+      .text(fx + 140, fy - 56, "🌑 Gang Sepi", {
+        fontFamily: "Arial",
+        fontSize: "11px",
+        color: "#FF6666",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(153);
+
+    // Gambar mini NPC gang (icon peringatan) di cabang kanan
+    forkG.fillStyle(0xff2200, 0.7);
+    forkG.fillCircle(fx + 152, fy - 82, 10);
+    forkG.fillStyle(0xffffff);
+    forkG.fillRect(fx + 150, fy - 89, 3, 7);
+    forkG.fillRect(fx + 150, fy - 80, 3, 3);
 
     this.add
-      .text(W / 2, 100, "⚠ Ada Dua Jalur!", {
+      .text(W / 2, fy + 74, "⚠ ADA DUA JALUR!", {
         ...CFG.F.SUBTITLE,
         color: "#FFD700",
         fontStyle: "bold",
@@ -813,7 +1041,7 @@ class Day1 extends Phaser.Scene {
     this.add
       .text(
         W / 2,
-        130,
+        fy + 103,
         "Rara harus memilih jalur ke sekolah.\nMana yang lebih aman?",
         {
           fontFamily: "Arial",
@@ -830,12 +1058,12 @@ class Day1 extends Phaser.Scene {
       {
         label: "🏙 Jalan Ramai\n(lebih aman, ada banyak orang)",
         cat: "AMAN",
-        y: 195,
+        y: fy + 135,
       },
       {
-        label: "🌑 Gang Sepi\n(lebih cepat, tapi berbahaya)",
+        label: "🌑 Gang Sepi\n(lebih cepat, tapi berbahaya!)",
         cat: "BAHAYA",
-        y: 258,
+        y: fy + 208,
       },
     ];
 
@@ -863,15 +1091,68 @@ class Day1 extends Phaser.Scene {
       lbl.on("pointerdown", () => {
         GameState.pathChoice = c.cat === "AMAN" ? "safe" : "dangerous";
         GameState.addChoice(1, c.label.split("\n")[0], c.cat);
-        if (c.cat === "BAHAYA") {
+        // Checkpoint d1 — pemain tidak perlu ulang dari awal jika Game Over
+        GameState.checkpoints.d1 = true;
+        GameState.save();
+
+        if (c.cat === "AMAN") {
+          // ── JALUR RAMAI ──────────────────────────────────────────
+          // Gang blocker tidak akan muncul
+          this.npcs.runner.active = false;
+          // Motor nyasar tetap ada tapi tidak agresif
+          this.npcs.giftMan.angry = false;
+          // Bonus poin pilihan bijak
+          GameState.score += 50;
+          AudioManager.sfxCorrect();
+          // BGM tetap ceria
+          AudioManager.startBGM(90, "day1");
+        } else {
+          // ── JALUR GANG SEPI ──────────────────────────────────────
           GameState.loseLife();
-          // Extra NPC muncul jika jalur berbahaya
-          this.npcs.stranger1.active = true;
-          this.npcs.stranger1.x = 1320;
+          // Gang blocker aktif tapi hanya visual — dialog encounter (noApproach)
+          this.npcs.runner.active = true;
+          this.npcs.runner.angry = true;
+          // Motor Nyasar: posisikan di dalam gang, tetap terlihat (dialog-only via noApproach)
+          this.npcs.giftMan.active = true;
+          this.npcs.giftMan.x = 1350; // berdiri di dalam gang menghadang
+          this.npcs.giftMan.angry = true; // tampilan agresif
+          // Tambah dua pengintai approach-based di gang (setelah E2)
+          this.npcs.lurker1 = {
+            x: 1750,
+            y: 307,
+            active: true,
+            angry: true,
+            noApproach: false,
+            approachTimer: 0,
+            approached: false,
+            type: "gangGroup",
+            label: "Pengintai",
+          };
+          this.npcs.lurker2 = {
+            x: 1950,
+            y: 307,
+            active: true,
+            angry: true,
+            noApproach: false,
+            approachTimer: 0,
+            approached: false,
+            type: "gangGroup",
+            label: "Pengintai",
+          };
+          // BGM berganti ke nuansa menegangkan
+          AudioManager.startBGM(70, "boss");
+          AudioManager.sfxWrong();
         }
+
         // Hapus semua UI path choice (overlay, panel, bg2 buttons, labels)
         [...this.children.list]
-          .filter((o) => o.depth === 150 || o.depth === 151 || o.depth === 152)
+          .filter(
+            (o) =>
+              o.depth === 150 ||
+              o.depth === 151 ||
+              o.depth === 152 ||
+              o.depth === 153,
+          )
           .forEach((o) => o.destroy());
         this._applyPathScene(c.cat);
         this.phase = "walking2";
@@ -1415,6 +1696,65 @@ class Day1 extends Phaser.Scene {
   }
 
   // ══════════════════════════════════════════════════════════════════════
+  // SAFE ROUTE REWARD — muncul saat Rara berhasil lewat jalur aman tanpa blocker
+  _showSafeRouteReward() {
+    const W = CFG.WIDTH,
+      H = CFG.HEIGHT;
+    GameState.score += CFG.SCORE.AMAN;
+
+    const rewG = this.add.graphics().setScrollFactor(0).setDepth(150);
+    rewG.fillStyle(0x002211, 0.92);
+    rewG.fillRoundedRect(W / 2 - 200, H / 2 - 80, 400, 160, 14);
+    rewG.lineStyle(3, CFG.C.AMAN, 0.9);
+    rewG.strokeRoundedRect(W / 2 - 200, H / 2 - 80, 400, 160, 14);
+
+    const rewT = this.add
+      .text(W / 2, H / 2 - 55, "🎉 Selamat Tiba di Sekolah! +100 poin", {
+        fontFamily: "Arial",
+        fontSize: "18px",
+        color: "#44FF88",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(151);
+
+    const rewT2 = this.add
+      .text(
+        W / 2,
+        H / 2 - 10,
+        "Rara memilih Jalan Ramai dan tiba di sekolah\ndengan selamat! ✅\n\nSelalu pilih tempat ramai dan hindari jalan sepi!",
+        {
+          fontFamily: "Arial",
+          fontSize: "13px",
+          color: "#CCFFCC",
+          align: "center",
+          wordWrap: { width: 370 },
+        },
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(151);
+
+    const rewBtn = this.add
+      .text(W / 2, H / 2 + 55, "[ LANJUT → KARTU EDUKASI ]", {
+        fontFamily: "Arial",
+        fontSize: "13px",
+        color: "#FFD700",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(151)
+      .setInteractive({ useHandCursor: true });
+
+    rewBtn.on("pointerdown", () => {
+      [rewG, rewT, rewT2, rewBtn].forEach((o) => o.destroy());
+      this._showEduCard();
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
   // EDU CARD
   _showEduCard() {
     const W = CFG.WIDTH,
@@ -1441,16 +1781,16 @@ class Day1 extends Phaser.Scene {
 
     const tips = [
       {
-        h: "🚨 Apa itu Orang Asing Berbahaya?",
-        b: "Orang yang baru dikenal dan ingin menyentuhmu,\nmengajakmu pergi diam-diam, atau menawarkan hadiah.",
+        h: "� ORANG ASING KASIH HADIAH = RED FLAG!",
+        b: "Permen, snack, mainan, atau tumpangan GRATIS dari orang yang\nbaru dikenal adalah tanda bahaya. Jangan terima, langsung pergi!",
       },
       {
         h: "✅ Yang Harus Dilakukan:",
-        b: "• Teriak KERAS dan minta bantuan\n• Lari ke tempat ramai / toko / warung\n• Ceritakan ke orang tua atau guru",
+        b: "• Tolak dengan tegas — kamu BOLEH berkata TIDAK!\n• Teriak KERAS dan lari ke tempat ramai\n• Ceritakan ke orang tua, guru, atau orang dewasa terpercaya",
       },
       {
         h: '🛡 "Tidak" adalah Hakmu!',
-        b: "Kamu berhak berkata TIDAK kepada siapapun\nyang membuatmu tidak nyaman — termasuk orang dewasa.",
+        b: "Kamu berhak menolak siapapun yang membuatmu tidak nyaman —\ntermasuk orang dewasa atau orang yang mengaku baik.",
       },
     ];
     let y = 80;
@@ -1619,7 +1959,9 @@ class Day1 extends Phaser.Scene {
     voiceMeter.tick();
 
     // Kontrol gerakan Rara
-    const speed = voiceMeter.isShout() ? 220 : 150;
+    // Di gang sepi: kecepatan dasar sedikit lebih lambat (ketakutan) dan NPC lebih mengancam
+    const isDangerous = GameState.pathChoice === "dangerous";
+    const baseSpeed = voiceMeter.isShout() ? 220 : isDangerous ? 120 : 150;
     if (
       this.phase !== "encounter1" &&
       this.phase !== "encounter2" &&
@@ -1629,10 +1971,10 @@ class Day1 extends Phaser.Scene {
       this.phase !== "complete"
     ) {
       if (this.cursors.left.isDown) {
-        this.raraBody.setVelocityX(-speed);
+        this.raraBody.setVelocityX(-baseSpeed);
       } else if (this.cursors.right.isDown || this.phase === "tutorial") {
-        this.raraBody.setVelocityX(speed * 0.5); // auto walk slow
-        if (this.cursors.right.isDown) this.raraBody.setVelocityX(speed);
+        this.raraBody.setVelocityX(baseSpeed * 0.5); // auto walk slow
+        if (this.cursors.right.isDown) this.raraBody.setVelocityX(baseSpeed);
       } else {
         this.raraBody.setVelocityX(30); // gentle auto-walk
       }
@@ -1671,17 +2013,61 @@ class Day1 extends Phaser.Scene {
     const g = this.charGfx;
     const rx = this.raraBody.x,
       ry = this.raraBody.y - 32;
-    const raraState = this.raraBody.body.velocity.x !== 0 ? "walk" : "idle";
-    // Bobbing animasi saat idle
+    const isMoving = this.raraBody.body.velocity.x !== 0;
+    const isDangerousPath = GameState.pathChoice === "dangerous";
+    // Di gang sepi: Rara terlihat takut saat berdiri diam
+    const raraState = isMoving ? "walk" : isDangerousPath ? "scared" : "idle";
     const bobY = raraState === "idle" ? Math.sin(this.time.now / 500) * 2 : 0;
     DrawUtils.rara(g, rx, ry + bobY, raraState);
 
-    // Draw active NPCs
+    // Label "RARA" atas karakter utama
+    if (!this._raraLabel) {
+      this._raraLabel = this.add
+        .text(0, 0, "RARA", {
+          fontFamily: "Arial",
+          fontSize: "10px",
+          color: "#FFD700",
+          fontStyle: "bold",
+          backgroundColor: "#000000aa",
+          padding: { x: 3, y: 1 },
+        })
+        .setDepth(12);
+    }
+    this._raraLabel.setPosition(rx - 16, ry - 50);
+
+    // Draw active NPCs — type-specific sprites + name labels
     Object.values(this.npcs).forEach((npc) => {
       if (!npc.active) return;
       const dist = npc.x - rx;
-      if (dist > -300 && dist < 400) {
-        DrawUtils.shadowNpc(g, npc.x, npc.y, npc.angry, dist < 150 && dist > 0);
+      if (dist > -300 && dist < 500) {
+        const approach = dist < 150 && dist > 0;
+        if (npc.type === "pamanBaik") {
+          DrawUtils.pamanBaik(g, npc.x, npc.y);
+        } else if (npc.type === "motorNpc") {
+          DrawUtils.motorNpc(g, npc.x, npc.y - 10);
+        } else if (npc.type === "gangGroup") {
+          DrawUtils.gangGroup(g, npc.x, npc.y);
+        } else {
+          DrawUtils.shadowNpc(g, npc.x, npc.y, npc.angry, approach);
+        }
+        // Floating name label (dibuat sekali, di-update posisinya)
+        if (!npc._lbl) {
+          npc._lbl = this.add
+            .text(npc.x, npc.y - 68, npc.label || "?", {
+              fontFamily: "Arial",
+              fontSize: "10px",
+              color: "#FF8888",
+              fontStyle: "bold",
+              backgroundColor: "#00000099",
+              padding: { x: 3, y: 1 },
+            })
+            .setDepth(13)
+            .setOrigin(0.5);
+        }
+        npc._lbl.setPosition(npc.x, npc.y - 68);
+        npc._lbl.setVisible(true);
+      } else if (npc._lbl) {
+        npc._lbl.setVisible(false);
       }
     });
   }
