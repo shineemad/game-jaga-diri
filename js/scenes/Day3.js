@@ -299,8 +299,25 @@ class Day3 extends Phaser.Scene {
         ov.destroy();
         t.destroy();
         s.destroy();
-        this.phase = "walk_intro";
-        this._startWalkIntroRain();
+        // Konteks narasi: kenapa Rara ke parkiran sendirian
+        this.dlg.show(
+          [
+            {
+              speaker: "Narasi",
+              portrait: "rara",
+              text: "Bel pulang berbunyi di SMP Harapan.\nHari ini hujan deras dan Ibu Rara tidak bisa menjemput.\nRara harus pulang sendiri ke rumah.",
+            },
+            {
+              speaker: "Rara",
+              portrait: "rara",
+              text: '"Tidak apa-apa... aku pesan ojol saja lewat HP.\nParkirannya ada di ujung jalan, tidak terlalu jauh."',
+            },
+          ],
+          () => {
+            this.phase = "walk_intro";
+            this._startWalkIntroRain();
+          },
+        );
       },
     });
   }
@@ -485,7 +502,24 @@ class Day3 extends Phaser.Scene {
       this.cameras.main.setBounds(0, 0, CFG.WIDTH, CFG.HEIGHT);
       this._drawParkiranBackground();
       this.phase = "chat_v2";
-      this._startChatV2();
+      // Dialog kedatangan: konteks Rara sampai di parkiran + pesan mencurigakan
+      this.dlg.show(
+        [
+          {
+            speaker: "Narasi",
+            portrait: "rara",
+            text: "Rara tiba di parkiran — basah karena hujan!\nDia membuka HP untuk mengecek ojol yang sudah dipesan...",
+          },
+          {
+            speaker: "Rara",
+            portrait: "rara",
+            text: '"Eh?! Tiba-tiba ada pesan masuk dari nomor tidak dikenal...\n*Jantung Rara berdebar tidak enak.*"',
+          },
+        ],
+        () => {
+          this._startChatV2();
+        },
+      );
     }
   }
 
@@ -542,6 +576,7 @@ class Day3 extends Phaser.Scene {
 
   _startChatV2() {
     this.chatV2Idx = 0;
+    this._chatV2History = []; // Riwayat pesan untuk stacking
     this._showChatV2Msg();
   }
 
@@ -555,7 +590,7 @@ class Day3 extends Phaser.Scene {
           {
             speaker: "Narasi",
             portrait: "rara",
-            text: "Rara memutuskan pulang naik ojol setelah kejadian tadi.\nPesanannya sudah tiba di parkiran — tapi Rara harus CEK PLAT dulu\nsebelum naik!",
+            text: "Rara berhasil mengatasi pesan berbahaya itu!\nOjol pesanan Rara sudah tiba di parkiran.\nTapi sebelum naik, Rara HARUS cek plat nomor dulu!",
           },
         ],
         () => {
@@ -570,30 +605,23 @@ class Day3 extends Phaser.Scene {
     this.children.list.filter((c) => c._isChatV2).forEach((c) => c.destroy());
     this._drawChatV2Header();
 
+    if (msg.from !== "choice") {
+      // Tambah ke riwayat sebelum render (untuk stacking)
+      if (!this._chatV2History) this._chatV2History = [];
+      this._chatV2History.push(msg.text);
+    }
+
     if (msg.from === "choice") {
+      // Tampilkan riwayat pesan di atas panel pilihan
+      this._drawChatV2Stack();
       this._showChatV2Choices(msg.choices);
       return;
     }
 
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
-    const bubble = this.add.graphics().setScrollFactor(0).setDepth(80);
-    bubble._isChatV2 = true;
-    bubble.fillStyle(0x330000, 0.95);
-    bubble.fillRoundedRect(18, H * 0.2, W * 0.7, 65, 10);
-    bubble.lineStyle(2, 0xff4444, 0.6);
-    bubble.strokeRoundedRect(18, H * 0.2, W * 0.7, 65, 10);
-
-    const txt = this.add
-      .text(30, H * 0.21, msg.text, {
-        fontFamily: "Arial",
-        fontSize: "14px",
-        color: "#FFAAAA",
-        wordWrap: { width: W * 0.65 },
-      })
-      .setScrollFactor(0)
-      .setDepth(81);
-    txt._isChatV2 = true;
+    // Tampilkan semua riwayat pesan bertumpuk (termasuk pesan baru)
+    this._drawChatV2Stack();
 
     const next = this.add
       .text(W - 20, H - 28, "▶ TAP", CFG.F.SMALL)
@@ -615,9 +643,39 @@ class Day3 extends Phaser.Scene {
     });
   }
 
+  // Render semua riwayat pesan chat secara bertumpuk (terlihat saat pilihan muncul)
+  _drawChatV2Stack() {
+    if (!this._chatV2History || this._chatV2History.length === 0) return;
+    const W = CFG.WIDTH;
+    const startY = 92;
+    const bubbleH = 36;
+    const gap = 8;
+    this._chatV2History.forEach((text, i) => {
+      const y = startY + i * (bubbleH + gap);
+      const isCurrent = i === this._chatV2History.length - 1;
+      const bubble = this.add.graphics().setScrollFactor(0).setDepth(80);
+      bubble._isChatV2 = true;
+      bubble.fillStyle(0x330000, isCurrent ? 0.95 : 0.62);
+      bubble.fillRoundedRect(18, y, W * 0.76, bubbleH, 8);
+      bubble.lineStyle(1.5, isCurrent ? 0xff4444 : 0x882222, 0.8);
+      bubble.strokeRoundedRect(18, y, W * 0.76, bubbleH, 8);
+      const txt = this.add
+        .text(28, y + 9, text, {
+          fontFamily: "Arial",
+          fontSize: "13px",
+          color: isCurrent ? "#FFAAAA" : "#CC7777",
+          wordWrap: { width: W * 0.7 },
+        })
+        .setScrollFactor(0)
+        .setDepth(81);
+      txt._isChatV2 = true;
+    });
+  }
+
   _showChatV2Choices(choices) {
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
+    const PANEL_Y = 222; // Di bawah 3 pesan bertumpuk (3×44px dari y=92)
 
     // Cancel previous timer if any
     if (this._chatV2Timer) {
@@ -628,11 +686,11 @@ class Day3 extends Phaser.Scene {
     const panG = this.add.graphics().setScrollFactor(0).setDepth(80);
     panG._isChatV2 = true;
     panG.fillStyle(CFG.C.PANEL, 0.96);
-    panG.fillRoundedRect(15, H * 0.28, W - 30, 220, 12);
-    DrawUtils.sulselBorder(panG, 15, H * 0.28, W - 30, 220, 0.7);
+    panG.fillRoundedRect(15, PANEL_Y, W - 30, 228, 12);
+    DrawUtils.sulselBorder(panG, 15, PANEL_Y, W - 30, 228, 0.7);
 
     this.add
-      .text(W / 2, H * 0.3, "Rara harus memilih tindakan yang tepat!", {
+      .text(W / 2, PANEL_Y + 14, "Rara harus memilih tindakan yang tepat!", {
         fontFamily: "Arial",
         fontSize: "13px",
         color: "#FF8888",
@@ -645,7 +703,7 @@ class Day3 extends Phaser.Scene {
     // ── 6-detik countdown timer (GDD spec)
     let secs = 6;
     const timerTxt = this.add
-      .text(W - 24, H * 0.3, "⏱ 6s", {
+      .text(W - 24, PANEL_Y + 14, "⏱ 6s", {
         fontFamily: "Arial",
         fontSize: "13px",
         color: "#FFD700",
@@ -691,7 +749,7 @@ class Day3 extends Phaser.Scene {
     });
 
     choices.forEach((c, i) => {
-      const by = H * 0.34 + i * 46;
+      const by = PANEL_Y + 34 + i * 46;
       const bw = W - 40;
       const bg2 = this.add.graphics().setScrollFactor(0).setDepth(80);
       bg2._isChatV2 = true;
@@ -1060,22 +1118,26 @@ class Day3 extends Phaser.Scene {
     const W = CFG.WIDTH,
       H = CFG.HEIGHT;
 
+    // Gambar suasana parkiran — Rara takut, Si Bayangan menghalangi jalan
+    DrawUtils.rara(this.charGfx, W * 0.22, H * 0.52, "scared");
+    DrawUtils.shadowNpc(this.charGfx, W * 0.66, H * 0.46, false);
+
     this.dlg.show(
       [
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: 'Di parkiran sekolah, seseorang tiba-tiba menghalangi jalan Rara.\nIni adalah "Si Bayangan Gelap" — orang yang mengirimkan pesan berbahaya ke Rara tadi!',
+          text: "Rara baru saja mau naik ojol ketika seseorang tiba-tiba menghalangi jalannya!\nOrang itu... adalah \"Si Bayangan Gelap\" —\npengirim pesan-pesan berbahaya tadi yang kini muncul langsung di depan Rara!",
         },
         {
           speaker: "Si Bayangan Gelap",
           portrait: "boss",
-          text: '"Hei, kemana mau pergi? Ikut dulu. Ada keperluan penting sama kamu~"',
+          text: '"Hei, mau kemana sendirian? Ikut aku dulu.\nAda yang perlu kita bicarakan, sebentar saja~"',
         },
         {
           speaker: "Rara",
           portrait: "rara",
-          text: "Rara merasa sangat takut. Tapi Rara ingat — dia harus BERANI dan BERSUARA KERAS!",
+          text: '"Aku... aku tidak kenal kamu! Minggir!"\n\nRara ingat pelajarannya — DIAM = BAHAYA.\nDia harus BERSUARA KERAS dan MINTA TOLONG!',
         },
       ],
       () => {
@@ -1511,7 +1573,7 @@ class Day3 extends Phaser.Scene {
         {
           speaker: "Rara",
           portrait: "rara",
-          text: '"Pak Guru, tadi ada orang yang mengancam saya! Namanya Si Petta!"\n\nRara memberanikan diri untuk bercerita. Ini keputusan terbaik!',
+          text: '"Pak Guru, tadi ada orang yang mengancam saya!\nDia kirim pesan berbahaya ke HP ku, lalu menghadang di parkiran!"\n\nRara memberanikan diri untuk bercerita. Ini keputusan terbaik!',
         },
         {
           speaker: "Pak Guru & Polisi",
