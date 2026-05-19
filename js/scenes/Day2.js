@@ -381,12 +381,17 @@ class Day2 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "Pagi hari. Rara berangkat sendiri ke sekolah — hari ini naik angkot untuk pertama kalinya!",
+          text: "Pagi ini Rara harus berangkat sendiri ke sekolah.\nHari ini pertama kalinya Rara naik angkot sendirian!",
         },
         {
           speaker: "Rara",
           portrait: "rara",
-          text: "Haltenya masih jauh di ujung jalan ini... Ayo cepat, jangan sampai ketinggalan angkot!",
+          text: '"Bismillah, aku pasti bisa! 😤\nHaltenya ada di ujung jalan — ayo cepat sebelum angkotnya pergi!"',
+        },
+        {
+          speaker: "Narasi",
+          portrait: "rara",
+          text: "Ingat ya — kalau ada yang mencurigakan di jalan atau angkot:\nTERIAK keras dan cari orang dewasa terdekat! 📢",
         },
       ],
       () => {
@@ -396,7 +401,7 @@ class Day2 extends Phaser.Scene {
 
         // Petunjuk (scroll-fixed)
         this._walkHintTxt = this.add
-          .text(W / 2, 54, "➔ Jalan ke halte... (TERIAK untuk berlari!)", {
+          .text(W / 2, 54, "➔ Jalan ke halte — TERIAK buat lari lebih cepat! 📢", {
             ...CFG.F.SMALL,
             color: "#FFD700",
             stroke: "#000",
@@ -551,25 +556,45 @@ class Day2 extends Phaser.Scene {
         {
           speaker: "Rara",
           portrait: "rara",
-          text: "Rara sampai di halte. Angkot menuju sekolah sudah ada.\nAda beberapa orang menunggu di sini...",
+          text: "Akhirnya sampai di halte! Angkotnya udah ada nih.\nAda beberapa orang yang lagi nunggu di sini...",
+        },
+        {
+          speaker: "Rara (dalam hati)",
+          portrait: "rara",
+          text: "Hmm... ada bapak-bapak yang dari tadi ngelirik ke sini.\nRara ngerasa nggak nyaman...",
         },
         {
           speaker: "Pria Asing",
           portrait: "shadow",
-          text: '"Cantik ya! FB berapa? Om bisa antar ke sekolah nanti lho — gratis!"',
+          text: '"Eh dek, sendirian ke sekolah?" *senyum-senyum*',
         },
         {
-          speaker: "— PILIH —",
+          speaker: "Rara (dalam hati)",
+          portrait: "rara",
+          text: "Rara nggak kenal orang ini sama sekali...",
+        },
+        {
+          speaker: "Pria Asing",
+          portrait: "shadow",
+          text: '"Cantik ya! FB-nya berapa dek? 😊\nOm bisa antar ke sekolah kok — gratis, nggak usah naik angkot!"',
+        },
+        {
+          speaker: "Rara (dalam hati)",
+          portrait: "rara",
+          text: "🚩 Langsung minta kontak DAN nawarin tumpangan?!\nIni aneh banget — ini TANDA BAHAYA!",
+        },
+        {
+          speaker: "— PILIH RESPONS RARA —",
           choices: [
             {
-              label: "Abaikan & pindah tempat duduk",
+              label: "Abaikan & pindah posisi menjauh",
               category: "AMAN",
               onPick: () => {
                 GameState.score += CFG.SCORE.AMAN;
               },
             },
             {
-              label: '"Hmm, tidak usah pak..."',
+              label: '"Hmm... nggak usah pak, makasih."',
               category: "RAGU",
               onPick: () => {
                 GameState.score += CFG.SCORE.RAGU;
@@ -585,7 +610,7 @@ class Day2 extends Phaser.Scene {
         {
           speaker: "Tips Keamanan",
           portrait: "rara",
-          text: "💡 Orang asing yang terlalu ramah & langsung minta kontak = WASPADA!\nJangan pernah berikan nomor HP atau media sosialmu!",
+          text: "💡 Orang asing yang langsung minta kontak atau nawarin tumpangan = WASPADA!\nJangan pernah kasih nomor HP atau medsos ke orang yang baru dikenal!",
         },
       ],
       () => {
@@ -608,17 +633,17 @@ class Day2 extends Phaser.Scene {
             {
               speaker: "Narasi",
               portrait: "rara",
-              text: "Angkot tujuan sekolah datang. Rara naik dan memilih duduk paling depan, dekat sopir.",
+              text: "Angkot datang! Rara naik dan langsung pilih tempat duduk\npaling depan, deket sopir. ✓",
             },
             {
               speaker: "Rara (dalam hati)",
               portrait: "rara",
-              text: "Hmm… pria tadi juga ikut naik. Rara harus waspada dan tidak duduk di dekatnya!",
+              text: "Eh... pria tadi ikut naik angkot yang sama! 😨\nRara harus tetap waspada dan jangan duduk dekatnya!",
             },
             {
               speaker: "Narasi",
               portrait: "rara",
-              text: "Sambil menunggu sampai sekolah, Rara membuka catatan PR Kesehatan tentang keselamatan tubuh.",
+              text: "Sambil nunggu sampai sekolah, Rara buka catatan PR Kesehatan\ntentang keselamatan tubuh.",
             },
           ],
           () => this._startQuiz(),
@@ -1323,12 +1348,12 @@ class Day2 extends Phaser.Scene {
           {
             speaker: "Narasi",
             portrait: "rara",
-            text: "Di dalam angkot, tiba-tiba HP Rara berbunyi. Ada pesan masuk dari nomor yang tidak dikenal...",
+            text: "Di dalam angkot, HP Rara tiba-tiba berbunyi! 📱\nAda pesan masuk dari nomor yang nggak tersimpan...",
           },
           {
             speaker: "Rara (dalam hati)",
             portrait: "rara",
-            text: "Siapa ini? Aku tidak kenal nomor ini.",
+            text: "Eh? Nggak ada namanya... Rara nggak kenal nomor ini sama sekali.",
           },
         ],
         () => this._startChatSim(),
@@ -1345,13 +1370,13 @@ class Day2 extends Phaser.Scene {
       { from: "asing", text: "Rahasia kita ya, jangan bilang mama! 🤫" },
       {
         from: "choice",
-        text: "Rara membalas apa?",
+        text: "Gimana Rara harus bales?",
         hasScreenshot: true,
         choices: [
           {
             label: "Iya om boleh, ini fotonya! 📸",
             category: "BAHAYA",
-            edu: "Jangan pernah kirim foto ke orang asing!\nOrang asing yang minta foto & minta disembunyikan dari orang tua = GROOMER!\nSegera blokir dan ceritakan ke orang tua.",
+            edu: "Jangan PERNAH kirim foto ke orang yang nggak kamu kenal!\nOrang yang minta foto + minta dirahasiain dari ortu = GROOMER!\nLangsung BLOKIR dan ceritain ke ortu sekarang!",
             penalty: true,
           },
           {
@@ -1742,7 +1767,7 @@ class Day2 extends Phaser.Scene {
         .text(
           W / 2,
           H / 2,
-          "Memblokir orang asing + lapor ke orang tua\nadalah tindakan PALING TEPAT! ✓",
+          "Ngeblokir orang asing + cerita ke ortu\n= tindakan PALING TEPAT yang bisa kamu lakuin! ✓",
           {
             fontFamily: "Arial",
             fontSize: "12px",
@@ -1850,7 +1875,7 @@ class Day2 extends Phaser.Scene {
       .text(
         W / 2,
         H / 2 + 4,
-        '"Halo, ini KPAI. Bagus sekali kamu melapor!\nSimpan screenshot sebagai bukti ya.\nHotline: 129 — Kamu tidak sendirian!" 💙',
+        '"Halo, ini KPAI! Keren banget kamu berani lapor!\nSimpan screenshot-nya sebagai bukti ya.\nHubungi kami kapanpun di Hotline 129 — kamu nggak sendirian!" 💙',
         {
           fontFamily: "Arial",
           fontSize: "12px",
@@ -1927,7 +1952,7 @@ class Day2 extends Phaser.Scene {
       .text(
         W / 2,
         H / 2 - 20,
-        "Merespons dengan cepat sangat penting!\nDiam terlalu lama bisa diartikan sebagai persetujuan.\nSaat ada gangguan — segera BLOKIR atau BALAS TEGAS!",
+        "Merespons cepat itu penting banget!\nDiam terlalu lama bisa dianggap setuju sama si pengirim.\nKalau ada yang ganggu di chat — langsung BLOKIR atau BALAS TEGAS!",
         {
           fontFamily: "Arial",
           fontSize: "12px",
@@ -2003,12 +2028,22 @@ class Day2 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "Pria asing tadi yang mengikutinya ikut naik angkot dan mulai mendekat ke Rara!",
+          text: "Tiba-tiba pria asing itu geser duduk makin deket ke arah Rara... 😨",
         },
         {
           speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "Rara harus berteriak memanggil sopir angkot!\nPanggil sopir sambil bergerak ke depan!",
+          text: "Eh?! Nggak nyaman banget! Kenapa dia pindah ke sini?!",
+        },
+        {
+          speaker: "Pria Asing",
+          portrait: "shadow_angry",
+          text: '"Eh dek, gimana sekolahnya? Nggak usah takut, Om nggak gigit kok~"',
+        },
+        {
+          speaker: "Rara (dalam hati)",
+          portrait: "rara",
+          text: "Rara HARUS minta tolong sekarang!\nKalau TERIAK keras, sopir pasti denger! 📢",
         },
       ],
       () => {
@@ -2250,7 +2285,7 @@ class Day2 extends Phaser.Scene {
         {
           speaker: "Ibu Sopir",
           portrait: "sopir",
-          text: '"Ada apa dek? Ayo naik ke depan sama Ibu. Tenang saja, Ibu ada di sini ki!"\n\n✓ Luar biasa! Bersuara keras adalah tindakan yang tepat dan berani! +500 poin',
+          text: '"Ada apa dek?! Ayo ke depan sini sama Ibu!\nTenang ya, ada Ibu di sini~"\n\n✓ KEREN! Bersuara keras = tindakan paling berani dan tepat! +500 poin',
         },
       ],
       () => {
@@ -2274,12 +2309,12 @@ class Day2 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "Waktu hampir habis! Rara harus segera bertindak!",
+          text: "Waktu hampir habis! Rara HARUS bertindak SEKARANG! ⏰",
         },
         {
           speaker: "— PILIH TINDAKAN —",
           portrait: "sopir",
-          text: "Bagaimana Rara meminta bantuan sopir?",
+          text: "Gimana Rara minta bantuan sopir?",
           choices: [
             {
               label: "📢 Teriak keras 'TOLONG!'",
@@ -2305,7 +2340,7 @@ class Day2 extends Phaser.Scene {
               {
                 speaker: "Ibu Sopir",
                 portrait: "sopir",
-                text: '"Tenang dek, Ibu bantu. Ayo ke depan sama Ibu!"',
+                text: '"Hei dek! Ada apa?! Ayo ke depan sini sama Ibu ya!"',
               },
             ],
             () => {
@@ -2320,7 +2355,7 @@ class Day2 extends Phaser.Scene {
               {
                 speaker: "Narasi",
                 portrait: "rara",
-                text: "Rara hanya bisa diam... Beruntung angkot tiba di sekolah tepat waktu.\n⚠ Ingat: bersuara keras adalah cara terbaik untuk minta bantuan!",
+                text: "Rara cuma bisa diam... Untungnya angkot udah sampai di sekolah.\n⚠ Ingat: kalau merasa nggak aman, TERIAK keras! Jangan diam aja!",
               },
             ],
             () => {
