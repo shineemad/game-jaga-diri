@@ -780,36 +780,56 @@ class Day1 extends Phaser.Scene {
       // GDD Encounter 1: PAMAN BAIK — "Mau permen? Ikut om ke warung bentar ya!"
       stranger1: () => [
         {
+          speaker: "Narasi",
+          portrait: "rara",
+          text: "*Tiba-tiba ada orang asing mendekat ke arah Rara...*",
+        },
+        {
           speaker: "Paman Baik",
           portrait: "shadow",
-          text: '"Eh dek, mau permen? Enak lho~\nIkut om ke warung bentar ya, dekat kok!"',
+          text: '"Hei dek, bentar ya~!"',
         },
         {
-          speaker: "Rara",
+          speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "*Rara kaget! Ini orang asing, nggak pernah lihat sebelumnya!*\nOrang ini nawarin permen dan mau ngajak Rara pergi... Hati-hati! ⚠",
+          text: "Eh? Siapa ini? Rara nggak pernah lihat orang ini sebelumnya...",
         },
         {
-          speaker: "— PILIH RESPONS —",
+          speaker: "Paman Baik",
+          portrait: "shadow",
+          text: '"Mau permen nggak? Enak banget lho~\nOm punya banyak di warung, ikut bentar aja ya, deket kok!"',
+        },
+        {
+          speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "Gimana Rara harus merespons?",
+          text: "Tunggu... Rara nggak kenal orang ini sama sekali!\nDia nawarin permen DAN mau ngajak Rara pergi... ⚠ Ini nggak bener!",
+        },
+        {
+          speaker: "Paman Baik",
+          portrait: "shadow",
+          text: '"Ayo dong, nggak usah malu-malu~ Sebentar aja kok!"',
+        },
+        {
+          speaker: "— PILIH RESPONS RARA —",
+          portrait: "rara",
+          text: "Gimana Rara harus merespons orang ini?",
           choices: [
             {
-              label: '"Nggak mau! Aku nggak kenal Bapak!" (lari ke tempat rame)',
+              label: '"NGGAK MAU! Aku nggak kenal Bapak!" → Lari ke tempat rame!',
               category: "AMAN",
               onPick: () => {
                 GameState.score += 100;
               },
             },
             {
-              label: '"Makasih, tapi aku udah mau telat sekolah nih!"',
+              label: '"Makasih Pak, tapi aku udah mau telat sekolah nih..."',
               category: "RAGU",
               onPick: () => {
                 GameState.score += 50;
               },
             },
             {
-              label: '"Boleh dong, om punya permen apa aja?"',
+              label: '"Boleh~ Om punya permen apa aja?"',
               category: "BAHAYA",
               onPick: () => {},
             },
@@ -818,42 +838,67 @@ class Day1 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "🚩 ORANG ASING KASIH HADIAH = TANDA BAHAYA!\nJangan pernah ikut atau terima apapun dari orang yang nggak kamu kenal!",
+          text: "🚩 INGAT: Orang asing yang kasih hadiah atau ngajak pergi = TANDA BAHAYA!\nSelalu tolak dengan tegas dan pergi ke tempat yang rame!",
         },
       ],
       // GDD Encounter 2: MOTOR NYASAR — "Mbak, sekolahnya yang mana ya?"
       giftMan: () => [
         {
+          speaker: "Narasi",
+          portrait: "rara",
+          text: "*Ada bunyi motor melambat di belakang Rara...*",
+        },
+        {
           speaker: "Pria Motor",
           portrait: "shadow",
-          text: '"Mbak, maaf ya — SMP Harapan yang mana?\nKebetulan aku searah nih, naik aja gratis!~"',
+          text: '"Permisi dek, numpang tanya~"',
         },
         {
-          speaker: "Rara",
+          speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "Ada pria di motor tanya arah, terus langsung nawarin tumpangan. Hati-hati banget! 🚨",
+          text: "Hmm? Ada orang di motor manggil aku...",
         },
         {
-          speaker: "— PILIH RESPONS —",
+          speaker: "Pria Motor",
+          portrait: "shadow",
+          text: '"SMP Harapan itu ke mana ya? Aku lagi nyari-nyari nih."',
+        },
+        {
+          speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "Apa yang Rara lakuin?",
+          text: "Kelihatannya cuma nanya arah sih... tapi kok langsung bicara ke aku?",
+        },
+        {
+          speaker: "Pria Motor",
+          portrait: "shadow",
+          text: '"Ooh! Kebetulan banget — aku searah tuh!\nYuk naik aja, aku anterin gratis deh~"',
+        },
+        {
+          speaker: "Rara (dalam hati)",
+          portrait: "rara",
+          text: "🚨 TUNGGU! Tadi nanya arah, sekarang langsung nawarin tumpangan?!\nIni mencurigakan banget! Jangan sampai tertipu!",
+        },
+        {
+          speaker: "— PILIH RESPONS RARA —",
+          portrait: "rara",
+          text: "Apa yang Rara lakuin sekarang?",
           choices: [
             {
-              label: '"Nggak mau naik! Makasih, aku jalan sendiri aja!"',
+              label: '"Nggak mau! Makasih, aku jalan sendiri aja!" (pergi cepat)',
               category: "AMAN",
               onPick: () => {
                 GameState.score += 100;
               },
             },
             {
-              label: '"Nggak, makasih. Sebentar lagi juga sampai kok."',
+              label: '"Nggak, makasih. Udah mau sampai kok."',
               category: "RAGU",
               onPick: () => {
                 GameState.score += 50;
               },
             },
             {
-              label: '"Wah, searah? Oke deh, makasih ya!"',
+              label: '"Wah searah? Oke deh, makasih ya kak!"',
               category: "BAHAYA",
               onPick: () => {},
             },
@@ -862,30 +907,45 @@ class Day1 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "⚠ Jangan PERNAH naik kendaraan orang yang nggak kamu kenal!\nTolak dengan tegas dan pergi ke tempat rame.",
+          text: "⚠ Jangan PERNAH naik kendaraan orang yang nggak kamu kenal!\nMeski kelihatan baik, tetap tolak dengan tegas dan jalan ke tempat rame.",
         },
       ],
       // Encounter 2 VERSI GANG — motor nyasar lebih agresif & mengancam
       giftManDanger: () => [
         {
+          speaker: "Narasi",
+          portrait: "rara",
+          text: "*Di ujung gang yang sepi, terdengar suara motor mendekati Rara...*",
+        },
+        {
           speaker: "Pria Motor",
           portrait: "shadow_angry",
-          text: '"HEI! Kamu sendirian di sini?! Naik sini dong,\naku antar ke mana aja kamu mau!"',
+          text: '"HEI! Kamu sendirian di sini?!"',
         },
         {
           speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "Di gang sepi ini Rara ngerasa nggak aman banget. 😨\nPria ini terasa sangat mengancam! Harus bertindak CEPAT!",
+          text: "Rara kaget! Di gang sepi ini nggak ada orang lain...\nOrang ini suaranya keras dan terasa mengancam! 😨",
         },
         {
           speaker: "Pria Motor",
           portrait: "shadow_angry",
-          text: '"Diem aja? Sini lah, aku nggak gigit kok.\nGang ini bahaya banget buat anak sendirian!"',
+          text: '"Naik sini dong — aku antar ke mana kamu mau!\nDi sini bahaya banget buat anak sendirian kayak kamu~"',
         },
         {
-          speaker: "— PILIH TINDAKAN CEPAT! —",
+          speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "Rara HARUS bertindak sekarang juga! Apa yang dilakukan?",
+          text: "Rara ngerasa SANGAT nggak aman sekarang!\nHarus bertindak CEPAT sebelum terlambat!",
+        },
+        {
+          speaker: "Pria Motor",
+          portrait: "shadow_angry",
+          text: '"Hei, denger nggak?! Ayo cepet, jangan buang waktu!"',
+        },
+        {
+          speaker: "— TINDAKAN CEPAT! —",
+          portrait: "rara",
+          text: "Rara HARUS bertindak sekarang! Setiap detik berharga! ⏰",
           choices: [
             {
               label: "📢 TERIAK SEKERAS-KERASNYA & LARI ke jalan rame!",
@@ -902,7 +962,7 @@ class Day1 extends Phaser.Scene {
               },
             },
             {
-              label: '"I-iya deh... makasih ya Pak."',
+              label: '"I-iya deh... makasih Pak."',
               category: "BAHAYA",
               // Game Over: Rara naik dengan orang asing di gang sepi = penculikan
               onPick: () => {
@@ -914,19 +974,34 @@ class Day1 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "🚨 Gang sepi = BAHAYA NYATA! Kalau ada yang maksa, TERIAK sekeras mungkin!\nLari ke keramaian dan cari orang dewasa yang bisa dipercaya!",
+          text: "🚨 Gang sepi = BAHAYA NYATA!\nKalau ada yang maksa, TERIAK sekeras mungkin dan LARI ke keramaian!",
         },
       ],
       blocker: () => [
         {
+          speaker: "Narasi",
+          portrait: "rara",
+          text: "*Tiba-tiba ada sosok gelap melangkah keluar dan menghalangi jalan Rara!*",
+        },
+        {
           speaker: "Orang Gelap",
           portrait: "shadow_angry",
-          text: '"HEI! Mau kemana kamu?! Ikut sama saya dulu, sebentar aja!"',
+          text: '"HEI! Berhenti dulu kamu!"',
         },
         {
           speaker: "Rara (dalam hati)",
           portrait: "rara",
-          text: "Seseorang tiba-tiba menghalangi jalan Rara. Rara ngerasa nggak aman banget! 😨",
+          text: "Rara nggak kenal orang ini! Tapi dia sengaja menghalangi jalan...\nRara ngerasa nggak aman banget! 😨",
+        },
+        {
+          speaker: "Orang Gelap",
+          portrait: "shadow_angry",
+          text: '"Ikut sama saya dulu — sebentar aja!\nNggak bakal lama kok~"',
+        },
+        {
+          speaker: "Rara (dalam hati)",
+          portrait: "rara",
+          text: "Dia makin mendekat... situasi makin mencekam!\nHARUS bertindak SEKARANG juga!",
         },
         {
           speaker: "— PILIH TINDAKAN —",
@@ -934,14 +1009,14 @@ class Day1 extends Phaser.Scene {
           text: "Rara harus bertindak CEPAT! Apa yang dilakukan?",
           choices: [
             {
-              label: "📢 TERIAK KERAS + LARI ke tempat rame!",
+              label: "📢 TERIAK KERAS! + LARI ke tempat rame!",
               category: "AMAN",
               onPick: () => {
                 GameState.score += 100;
               },
             },
             {
-              label: "(Diam dan berdiri panik di tempat...)",
+              label: "(Diam, panik, berdiri di tempat...)",
               category: "RAGU",
               // Diam di depan orang mengancam = berbahaya, kena penalti nyawa
               onPick: () => {
@@ -962,7 +1037,7 @@ class Day1 extends Phaser.Scene {
         {
           speaker: "Narasi",
           portrait: "rara",
-          text: "✓ Kalau dihadang orang asing:\nTERIAK → LARI → CARI orang dewasa yang bisa bantu!",
+          text: "✅ Kalau dihadang orang asing:\n→ TERIAK keras → LARI → CARI orang dewasa yang bisa bantu!",
         },
       ],
     };
